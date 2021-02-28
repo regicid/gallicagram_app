@@ -30,7 +30,6 @@ Plot <- function(data,input){
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=FALSE)}
   if(input$barplot){
-    Title = paste("<b>Répartition du nombre de numéros présents dans la base\nde données Gallica-presse pour la période", as.character(tableau$date[1])," - ",as.character(tableau$date[length(tableau$date)]))
     width = nrow(tableau)
     span = 2/width + input$span*(width-2)/(10*width)
     tableau$hovers = str_c(tableau$date,": N = ",tableau$base_temp)
@@ -126,7 +125,7 @@ ui <- navbarPage("Gallicagram",
                                                         value = 0),
                                             selectInput("resolution", label = "Résolution :", choices = c("Année","Mois")),
                                             actionButton("do","Générer le graphique"),
-                                            checkboxInput("barplot", "Afficher la quantité de données", value = FALSE),
+                                            checkboxInput("barplot", "Afficher la distribution des numéros de presse\ndans la base Gallica", value = FALSE),
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
@@ -160,10 +159,10 @@ server <- function(input, output){
   
   
 }
-Barplot <- function(){table<-read.csv("base_gallica.csv")
+Barplot <- function(){table<-read.csv("distribution_gallica_presse_ocerise.csv")
 table$hovers = str_c(table$date,": N = ",table$base_temp)
 plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-Title = paste("<b>Répartition des numéros dans Gallica-presse<b>")
+Title = paste("<b>Répartition des numéros océrisés dans Gallica-presse<b>")
 y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
