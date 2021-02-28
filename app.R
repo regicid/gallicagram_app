@@ -126,12 +126,12 @@ ui <- navbarPage("Gallicagram",
                                             selectInput("resolution", label = "Résolution :", choices = c("Année","Mois")),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des numéros de presse\ndans la base Gallica", value = FALSE),
+                                            downloadButton('downloadData', 'Télécharger les données')
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
-                                                    plotlyOutput("plot1"),
-                                                    downloadButton('downloadData', 'Télécharger les données')))),
+                                                    plotlyOutput("plot1"),))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus",plotlyOutput("corpus"))
 )
