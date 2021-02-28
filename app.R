@@ -17,12 +17,11 @@ Plot <- function(data,input){
   Title = Title %>% paste("d'entre eux</b>")
   width = length(unique(tableau$date))
   span = 2/width + input$span*(width-2)/(10*width)
-  #tableau$row = 1:width
   tableau$loess = tableau$nb_temp
-  for(mot in str_split(data$mot,",")[[1]]){
-    mot = str_replace(mot," ","%20")
+  for(mot in str_split(data$mot,"&")[[1]]){
     z = which(tableau$mot==mot)
-    tableau$loess[z] = loess(data=tableau[z,],ratio_temp~as.integer(date),span=span)$fitted
+    x = 1:length(z)
+    tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
   }
   tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
@@ -46,21 +45,15 @@ Plot <- function(data,input){
   }
 }
 
-Plot1 <- function(data,input){
-  tableau = data[["tableau"]]
-
-  return(plot1)
-}
-
 get_data <- function(mot,from,to,resolution){
-    mot = str_replace(mot," ","%20")
-    mots = str_split(mot,",")[[1]]
+    mots = str_split(mot,"&")[[1]]
     tableau<-as.data.frame(matrix(nrow=0,ncol=4),stringsAsFactors = FALSE)
-    progress <- shiny::Progress$new()
-    on.exit(progress$close())
-    progress$set(message = "Patience...", value = 0)
+    #progress <- shiny::Progress$new()
+    #on.exit(progress$close())
+    #progress$set(message = "Patience...", value = 0)
     for (i in from:to){
     for(mot in mots){
+      mot2 = str_replace_all(mot," ","%20")
       end_of_month = c(31,28,31,30,31,30,31,31,30,31,30,31)
       if( i%%4==0){end_of_month[2]=29} #Ne pas oublier les années bisextiles (merci Maxendre de m'y avoir fait penser)
       y<-as.character(i)
@@ -74,7 +67,7 @@ get_data <- function(mot,from,to,resolution){
             if(nchar(z)<2){z<-str_c("0",z)}
             beginning = str_c(y,"/",z,"/01")
             end = str_c(y,"/",z,"/",end_of_month[j])}
-      url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&maximumRecords=1&page=1&collapsing=false&version=1.2&query=text%20adj%20%22",mot,"%22%20%20and%20(dc.type%20all%20%22fascicule%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords=",mot)
+      url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&maximumRecords=1&page=1&collapsing=false&version=1.2&query=text%20adj%20%22",mot2,"%22%20%20and%20(dc.type%20all%20%22fascicule%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords=",mot2)
       ngram<-as.character(read_xml(url))
       a<-str_extract(str_extract(ngram,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
       url_base<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&maximumRecords=1&page=1&collapsing=false&version=1.2&query=(dc.type%20all%20%22fascicule%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)&suggest=10&keywords=")
@@ -86,7 +79,7 @@ get_data <- function(mot,from,to,resolution){
       tableau[nrow(tableau),]<-c(date,a,b,mot)
       }
     }
-    progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
+    #progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
     }
   colnames(tableau)<-c("date","nb_temp","base_temp","mot")
   format = "%Y"
@@ -95,8 +88,7 @@ get_data <- function(mot,from,to,resolution){
   tableau$nb_temp<-as.integer(tableau$nb_temp)
   tableau$base_temp<-as.integer(tableau$base_temp)
   tableau$ratio_temp<-tableau$nb_temp/tableau$base_temp
-  mots = str_replace(mots,"%20"," ")
-  data = list(tableau,paste(mots,collapse=","),resolution)
+  data = list(tableau,paste(mots,collapse="&"),resolution)
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
