@@ -5,7 +5,6 @@
 - Les données produites sont téléchargeables par l’utilisateur. Le [code source](https://github.com/regicid/gallicagram_app) de Gallicagram est libre d'accès et de droits.
 
 
-
 ## Extraction
 
 - Gallicagram procède à l’extraction du nombre de résultats de recherche renvoyé par l’[API de recherche de Gallica](https://api.bnf.fr/fr/api-gallica-de-recherche). Il est paramétré pour des recherches dans le corpus de presse de Gallica à l’intérieur de bornes chronologiques définies par l’utilisateur.
