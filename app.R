@@ -28,7 +28,7 @@ Plot <- function(data,input){
   y <- list(title = "Fréquence d'occurence dans Gallica-presse",titlefont = 41)
   x <- list(title = data[["resolution"]],titlefont = 41)
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
-  if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=FALSE)}
+  if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
   if(input$barplot){
     width = nrow(tableau)
     span = 2/width + input$span*(width-2)/(10*width)
