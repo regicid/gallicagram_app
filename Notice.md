@@ -1,7 +1,8 @@
 # Notice de Gallicagram
 
-Gallicagram est un programme représentant graphiquement l’évolution au cours du temps de la fréquence d’apparition d’un terme dans le corpus de presse de [Gallica](https://gallica.bnf.fr/). Développé par [Benjamin Azoulay](https://github.com/benjyazoulay/) et [Benoît de Courson](https://regicid.github.io/), il est intégralement rédigé en langage [R](https://www.r-project.org/) et présente une interface graphique interactive [Shiny](https://shiny.rstudio.com/).
-Les données produites sont téléchargeables par l’utilisateur. Le [code source](https://github.com/regicid/gallicagram_app) de Gallicagram est libre d'accès et de droits.
+- Gallicagram est un programme représentant graphiquement l’évolution au cours du temps de la fréquence d’apparition d’un terme dans le corpus de presse de [Gallica](https://gallica.bnf.fr/). 
+- Développé par [Benjamin Azoulay](https://github.com/benjyazoulay/) et [Benoît de Courson](https://regicid.github.io/), il est intégralement rédigé en langage [R](https://www.r-project.org/) et présente une interface graphique interactive [Shiny](https://shiny.rstudio.com/).
+- Les données produites sont téléchargeables par l’utilisateur. Le [code source](https://github.com/regicid/gallicagram_app) de Gallicagram est libre d'accès et de droits.
 
 
 
@@ -15,7 +16,7 @@ Les données produites sont téléchargeables par l’utilisateur. Le [code sour
 - L'utilisateur peut chercher un syntagme unique (ex. Clemenceau).
 - Il peut aussi comparer les évolutions respectives de deux syntagmes concurrents en les séparants par une esperluette "&" (ex. Georges Clemenceau&Aristide Briand).
 - Il peut enfin effectuer une recherche conditionnelle de forme OU en utilisant le signe "+" (ex. juif+juive). Il s'agit d'un "ou" inclusif qui renverra tous les numéros contenant les termes séparés par un "+".
-- Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&protestant+huguenot+parpaillot)
+- Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&calviniste+huguenot+parpaillot)
 
 ## Traitements
 
