@@ -48,9 +48,9 @@ Plot <- function(data,input){
 get_data <- function(mot,from,to,resolution){
     mots = str_split(mot,"&")[[1]]
     tableau<-as.data.frame(matrix(nrow=0,ncol=4),stringsAsFactors = FALSE)
-    #progress <- shiny::Progress$new()
-    #on.exit(progress$close())
-    #progress$set(message = "Patience...", value = 0)
+    progress <- shiny::Progress$new()
+    on.exit(progress$close())
+    progress$set(message = "Patience...", value = 0)
     for (i in from:to){
     for(mot in mots){
       mot2 = str_replace_all(mot," ","%20")
@@ -79,7 +79,7 @@ get_data <- function(mot,from,to,resolution){
       tableau[nrow(tableau),]<-c(date,a,b,mot)
       }
     }
-    #progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
+    progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
     }
   colnames(tableau)<-c("date","nb_temp","base_temp","mot")
   format = "%Y"
