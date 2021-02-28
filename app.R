@@ -115,7 +115,8 @@ ui <- navbarPage("Gallicagram",
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel('Réglages'),
                                           sidebarPanel(
-                                            textInput("mot","Mot à chercher","Clemenceau"),
+                                            textInput("mot","Terme(s) à chercher","Clemenceau"),
+                                            p('Séparer les termes recherchés par un "&"'),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
@@ -131,7 +132,7 @@ ui <- navbarPage("Gallicagram",
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
-                                                    plotlyOutput("plot1"),))),
+                                                    plotlyOutput("plot1")))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus",plotlyOutput("corpus"))
 )
