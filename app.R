@@ -30,14 +30,12 @@ Plot <- function(data,input){
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=FALSE)}
   if(input$barplot){
-    Title = paste("<b>Répartition du nombre de numéros présents dans la base\nde données Gallica-presse pour la période", as.character(tableau$date[1])," - ",as.character(tableau$date[length(tableau$date)]))
     width = nrow(tableau)
     span = 2/width + input$span*(width-2)/(10*width)
     tableau$hovers = str_c(tableau$date,": N = ",tableau$base_temp)
     plot1 = plot_ly(tableau, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text",marker = list(color='rgba(31, 119, 180,1)'))
     y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
-    x <- list(title = data[["resolution"]],titlefont = 41)
-    plot1 = layout(plot1, yaxis = y, xaxis = x,title = Title,showlegend = FALSE)
+    plot1 = layout(plot1,showlegend = FALSE)
     plot = subplot(plot,plot1,nrows = 2,legend=NULL,shareX = T)
     return(plot)
   } else{
@@ -113,8 +111,6 @@ ui <- navbarPage("Gallicagram",
         ),
       
             mainPanel(plotlyOutput("plot"),
-                      headerPanel(""),
-                      plotlyOutput("plot1"),
          downloadButton('downloadData', 'Télécharger les données')))),
          tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
          tabPanel("Corpus",plotlyOutput("corpus"))
