@@ -25,7 +25,7 @@ Plot <- function(data,input){
   }
   tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
-  y <- list(title = "Fréquence d'occurence dans Gallica-presse",titlefont = 41,tickformat = "%")
+  y <- list(title = "Fréquence d'occurence dans Gallica-presse",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
