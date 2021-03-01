@@ -119,6 +119,7 @@ get_data <- function(mot,from,to,resolution,doc_type){
   tableau$nb_temp<-as.integer(tableau$nb_temp)
   tableau$base_temp<-as.integer(tableau$base_temp)
   tableau$ratio_temp<-tableau$nb_temp/tableau$base_temp
+  tableau$ratio_temp[is.na(tableau$ratio_temp)]<-0
   data = list(tableau,paste(mots,collapse="&"),resolution)
   names(data) = c("tableau","mot","resolution")
   return(data)}
@@ -134,8 +135,8 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2),selected = 1),
-                                            numericInput("beginning","Début",1914,min=1631,max=2019),
-                                            numericInput("end","Fin",1920,min=1631,max=2019),
+                                            numericInput("beginning","Début",1914),
+                                            numericInput("end","Fin",1920),
                                             sliderInput("span",
                                                         "Lissage de la courbe :",
                                                         min = 0,
