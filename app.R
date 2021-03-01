@@ -133,7 +133,7 @@ ui <- navbarPage("Gallicagram",
                                             textInput("mot","Terme(s) à chercher","Clemenceau"),
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
-                                            radioButtons("doc_type", h3("Corpus :"),choices = list("Presse" = 1, "Livres" = 2),selected = 1),
+                                            radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2),selected = 1),
                                             numericInput("beginning","Début",1914,min=1631,max=2019),
                                             numericInput("end","Fin",1920,min=1631,max=2019),
                                             sliderInput("span",
@@ -151,14 +151,15 @@ ui <- navbarPage("Gallicagram",
                                                     headerPanel(""),
                                                     plotlyOutput("plot1")))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
-                 tabPanel("Corpus",plotlyOutput("corpus"))
+                 tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres"))
 )
 
 
 
 # Define server logic required to draw a histogram
 server <- function(input, output){
-  output$corpus = renderPlotly(Barplot())
+  output$corpus_presse = renderPlotly(Barplot1())
+  output$corpus_livres = renderPlotly(Barplot2())
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
@@ -177,11 +178,20 @@ server <- function(input, output){
   
   
 }
-Barplot <- function(){table<-read.csv("distribution_gallica_presse_ocerise.csv")
+Barplot1 <- function(){table<-read.csv("distribution_gallica_presse_ocerise.csv")
 table$hovers = str_c(table$date,": N = ",table$base_temp)
 plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-Title = paste("<b>Répartition des numéros océrisés dans Gallica-presse<b>")
+Title = paste("<b>Répartition des numéros de presse océrisés dans Gallica<b>")
 y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
+x <- list(title = "Date",titlefont = 41)
+plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
+plot2}
+
+Barplot2 <- function(){table<-read.csv("distribution_gallica_livres_ocerise.csv")
+table$hovers = str_c(table$date,": N = ",table$base_temp)
+plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
+Title = paste("<b>Répartition des livres océrisés dans Gallica<b>")
+y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
