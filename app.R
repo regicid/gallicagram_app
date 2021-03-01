@@ -113,7 +113,7 @@ ui <- navbarPage("Gallicagram",
                  tabPanel("Graphique",fluidPage(),
                           tags$head(
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
-                          pageWithSidebar(headerPanel('Réglages'),
+                          pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
                                             textInput("mot","Terme(s) à chercher","Clemenceau"),
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
