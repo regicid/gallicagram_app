@@ -44,7 +44,7 @@ Plot <- function(data,input){
   }
 }
 
-get_data <- function(mot,from,to,resolution){
+get_data <- function(mot,from,to,resolution,doc_type){
   mots = str_split(mot,"&")[[1]]
   tableau<-as.data.frame(matrix(nrow=0,ncol=4),stringsAsFactors = FALSE)
   progress <- shiny::Progress$new()
@@ -77,6 +77,9 @@ get_data <- function(mot,from,to,resolution){
       end = str_c(y,"/12/31")}
       I = 1
       if(resolution=="Mois"){I=1:12} #Pour faire ensuite une boucle sur les mois
+      
+      
+      if(doc_type==1){
       for(j in I){
         if(resolution=="Mois"){
           z = as.character(j)
@@ -92,6 +95,18 @@ get_data <- function(mot,from,to,resolution){
         tableau[nrow(tableau)+1,] = NA
         date=y
         if(resolution=="Mois"){date = paste(y,z,sep="/")}
+        tableau[nrow(tableau),]<-c(date,a,b,mot)
+      }}
+      
+      if(doc_type==2){
+        url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&collapsing=false&maximumRecords=1&page=1&version=1.2&query=text%20adj%20%22",mot,"%22%20%20and%20(dc.type%20all%20%22monographie%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",y,"%22%20and%20gallicapublication_date%3C=%22",y,"%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords=",mot)
+        ngram<-as.character(read_xml(url))
+        a<-str_extract(str_extract(ngram,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
+        url_base<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&collapsing=false&maximumRecords=1&page=1&version=1.2&query=(dc.type%20all%20%22monographie%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",y,"%22%20and%20gallicapublication_date%3C=%22",y,"%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords=")
+        ngram_base<-as.character(read_xml(url_base))
+        b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
+        tableau[nrow(tableau)+1,] = NA
+        date=y
         tableau[nrow(tableau),]<-c(date,a,b,mot)
       }
     }
@@ -118,6 +133,7 @@ ui <- navbarPage("Gallicagram",
                                             textInput("mot","Terme(s) à chercher","Clemenceau"),
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
+                                            radioButtons("doc_type", h3("Corpus :"),choices = list("Presse" = 1, "Livres" = 2),selected = 1),
                                             numericInput("beginning","Début",1914,min=1631,max=2019),
                                             numericInput("end","Fin",1920,min=1631,max=2019),
                                             sliderInput("span",
@@ -146,7 +162,7 @@ server <- function(input, output){
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
-    df = get_data(input$mot,input$beginning,input$end,input$resolution)
+    df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type)
     output$plot <- renderPlotly({Plot(df,input)})
     if(input$barplot){
       output$plot1 <- renderPlotly({Plot1(df,input)})}
