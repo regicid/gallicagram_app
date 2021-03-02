@@ -14,8 +14,10 @@
 ## Options de recherche
 - L'utilisateur peut chercher un syntagme unique (ex. Clemenceau).
 - Il peut aussi comparer les évolutions respectives de deux syntagmes concurrents en les séparants par une esperluette "&" (ex. Georges Clemenceau&Aristide Briand).
-- Il peut enfin effectuer une recherche conditionnelle de forme OU en utilisant le signe "+" (ex. juif+juive). Il s'agit d'un "ou" inclusif qui renverra tous les numéros contenant les termes séparés par un "+".
+- Il peut enfin effectuer une recherche conditionnelle de forme OU en utilisant le signe "+" (ex. juif+juive). Il s'agit d'un "ou" inclusif qui renverra tous les numéros contenant les termes séparés par un "+". La recherche exacte de Gallica dénombre des syntagmes exacts et isolés. Ainsi, entrer le mot "juif" ne permettra pas d'obtenir les résultats correspondant à son pluriel : "juifs". La recherche conditionnelle OU avec "+" permet d'intégrer ces résultats.
 - Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&calviniste+huguenot+parpaillot)
+- L'utilisateur peut choisir parmi deux corpus de recherche : la presse de Gallica (journaux et revues) et les livres de Gallica (monographies).
+- Le corpus de presse peut être analysé à l'échelle mensuelle ou à l'échelle annuelle/le corpus de livres ne peut être analysé qu'à l'échelle annuelle.
 
 ## Traitements
 
@@ -29,7 +31,7 @@ Le traitement des données extraites consiste au calcul pour chaque sous-séquen
 Le graphique présente cette fréquence en ordonnées et le temps en abscisses selon l’échelle sélectionnée. La courbe qu’il figure relie les points calculés par l’ordinateur. Des étiquettes interactives indiquent les valeurs absolues  et  lorsque l’utilisateur passe le curseur sur les points du graphique.
 Une fonctionnalité de lissage de type loess dont l’intensité est échelonnée de 0 à 10 permet d’estomper graphiquement les fluctuations. 
 
-## Corpus
+## Corpus de presse
 
 - Le corpus de presse de Gallica ne représente qu’une petite portion du corpus de presse de la Bibliothèque nationale de France. Ce corpus est toujours en cours de numérisation et d’océrisation et seule une partie du corpus numérisé est océrisé. C’est pourquoi le dénominateur extrait par Gallicagram peut varier d’un jour à l’autre. A ce jour, 17 430 titres sont numérisés dont 12 731 océrisés.
 - Le corpus de presse de Gallica n’est pas homogène en volume au cours du temps. Certaines périodes contiennent plus de titres que d’autres, c’est le cas notamment de l’entre-deux-guerres. Le calcul de la fréquence permet donc de contourner cette difficulté en rapportant le nombre de résultats au volume du corpus. Cependant, lorsque le corpus est trop mince, ces résultats peuvent perdre de leur significativité. Il revient ainsi à l’utilisateur de prendre en compte ce paramètre dans l’usage qu’il fait de Gallicagram et dans son interprétation des résultats.
@@ -37,6 +39,11 @@ Une fonctionnalité de lissage de type loess dont l’intensité est échelonné
 - Le corpus de presse numérisé contient bon nombre de revues annuelles qui créent un pic en valeur absolue en janvier.
 - Le corpus de presse de Gallica n’est pas homogène géographiquement. Les journaux tirés à Paris, dont certains sont nationaux, sont plus nombreux que les titres de la presse régionale.
 - Gallicagram ne compte pas le nombre d’articles, mais bien le nombre de numéros présentant au moins une fois le terme recherché. Ainsi, un numéro de presse mentionnant cent fois le terme recherché ne pèsera pas plus dans le calcul de l’indicateur qu’un numéro de presse où ce terme n’apparaît qu’une seule fois.
+
+## Corpus de livres
+
+- Gallicagram ne compte pas le nombre de citations du terme de recherche dans la masse des livres, mais le nombre de livres figurant le terme recherché. Il diffère en cela de [Google Ngram Viewer] (https://books.google.com/ngrams/graph?content=Abel+Bonnard%2CMarcel+Proust&year_start=1890&year_end=2019&corpus=30&smoothing=3)
+- Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaitre de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurence.
 
 
 
