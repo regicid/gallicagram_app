@@ -43,7 +43,7 @@ Une fonctionnalité de lissage de type loess dont l’intensité est échelonné
 ## Corpus de livres
 
 - Gallicagram ne compte pas le nombre de citations du terme de recherche dans la masse des livres, mais le nombre de livres figurant le terme recherché. Il diffère en cela de [Google Ngram Viewer] (https://books.google.com/ngrams/graph?content=Abel+Bonnard%2CMarcel+Proust&year_start=1890&year_end=2019&corpus=30&smoothing=3)
-- Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaitre de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurence.
+- Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaitre de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurrence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurrence.
 
 
 
