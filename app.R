@@ -11,10 +11,7 @@ data = list()
 
 Plot <- function(data,input){
   tableau = data[["tableau"]]
-  Title = paste("<b>Gallicagram a épluché", as.character(sum(tableau$base_temp)))
-  Title = Title %>% paste(' numéros,\n et trouvé "', data[["mot"]],sep="") 
-  Title = Title %>% paste(as.character(sum(tableau$nb_temp)),sep = '" dans ')
-  Title = Title %>% paste("d'entre eux</b>")
+  Title = paste("<b>Evolution de l'usage des termes dans Gallica</b>")
   width = length(unique(tableau$date))
   span = 2/width + input$span*(width-2)/(10*width)
   tableau$loess = tableau$nb_temp
@@ -25,8 +22,13 @@ Plot <- function(data,input){
   }
   tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
-  y <- list(title = "Fréquence d'occurence dans Gallica-presse",titlefont = 41,tickformat = ".1%")
+  y <- list(title = "Fréquence d'occurence dans le corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
+  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse (journaux et revues)\n"} else{"livres (monographies)\n"},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
+  legende=list(x = 0.5, y =0, #position of text adjust as needed 
+               text = legende, xref='paper', yref='paper', 
+               xanchor='right', yanchor='auto',
+               font=list(size=12, color="black"))
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
   if(input$barplot){
@@ -36,10 +38,11 @@ Plot <- function(data,input){
     plot1 = plot_ly(tableau, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text",marker = list(color='rgba(31, 119, 180,1)'))
     y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
     x <- list(title = data[["resolution"]],titlefont = 41)
-    plot1 = layout(plot1, yaxis = y, xaxis = x,title = Title,showlegend = FALSE)
+    plot1 = layout(plot1, yaxis = y, xaxis = x,title = Title,showlegend = FALSE,annotations =legende)
     plot = subplot(plot,plot1,nrows = 2,legend=NULL,shareX = T)
     return(plot)
   } else{
+    plot=layout(plot,annotations =legende)
     return(plot)
   }
 }
