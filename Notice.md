@@ -1,14 +1,14 @@
 # Notice de Gallicagram
 
-- Gallicagram est un programme représentant graphiquement l’évolution au cours du temps de la fréquence d’apparition d’un terme dans le corpus de presse de [Gallica](https://gallica.bnf.fr/). 
+- Gallicagram est un programme représentant graphiquement l’évolution au cours du temps de la fréquence d’apparition d’un terme dans le corpus de presse ou de livres de [Gallica](https://gallica.bnf.fr/). 
 - Développé par [Benjamin Azoulay](https://github.com/benjyazoulay/) et [Benoît de Courson](https://regicid.github.io/), il est intégralement rédigé en langage [R](https://www.r-project.org/) et présente une interface graphique interactive [Shiny](https://shiny.rstudio.com/).
 - Les données produites sont téléchargeables par l’utilisateur. Le [code source](https://github.com/regicid/gallicagram_app) de Gallicagram est libre d'accès et de droits.
 
 
 ## Extraction
 
-- Gallicagram procède à l’extraction du nombre de résultats de recherche renvoyé par l’[API de recherche de Gallica](https://api.bnf.fr/fr/api-gallica-de-recherche). Il est paramétré pour des recherches dans le corpus de presse de Gallica à l’intérieur de bornes chronologiques définies par l’utilisateur.
-- Gallicagram extrait des variables annuelles ou mensuelles selon le critère choisi par l’utilisateur. Son exécution procède à l’extraction de deux types de variables. La variable « base_temp » correspond au nombre de numéros de presse présents dans la base de données de Gallica pour une année donnée (resp. un mois). La variable « nb_temp » correspond au nombre de numéros de presse de la base dans lequel le terme recherché apparaît au cours d’une année donnée (resp. un mois). 
+- Gallicagram procède à l’extraction du nombre de résultats de recherche renvoyé par l’[API de recherche de Gallica](https://api.bnf.fr/fr/api-gallica-de-recherche). Il est paramétré pour des recherches à l’intérieur de bornes chronologiques définies par l’utilisateur. Les corpus sont restreints aux textes en français océrisés (mode texte disponible).
+- Gallicagram extrait des variables annuelles ou mensuelles selon le critère choisi par l’utilisateur. Son exécution procède à l’extraction de deux types de variables. La variable « base_temp » correspond au nombre total de documents présents dans la base de données de Gallica pour une année donnée (resp. un mois). La variable « nb_temp » correspond au nombre de documents de la base dans lequel le terme recherché apparaît au cours d’une année donnée (resp. un mois). 
 - Gallicagram extrait ces deux variables pour chaque année (resp. mois) comprise entre les deux bornes chronologiques définies par l’utilisateur et les stocke dans un tableau. Gallicagram présente donc un délai d’extraction qui correspond au temps nécessaire au téléchargement des données. Ce délai est d’autant plus long que les bornes chronologiques sont espacées ou que le séquençage est fin (séquençage au mois par exemple).
 
 ## Options de recherche
@@ -44,7 +44,7 @@ Une fonctionnalité de lissage de type loess dont l’intensité est échelonné
 
 - Gallicagram ne compte pas le nombre de citations du terme de recherche dans la masse des livres, mais le nombre de livres figurant le terme recherché. Il diffère en cela de [Google Ngram Viewer] (https://books.google.com/ngrams/graph?content=Abel+Bonnard%2CMarcel+Proust&year_start=1890&year_end=2019&corpus=30&smoothing=3)
 - Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaitre de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurrence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurrence.
-
+- Les ouvrages comprenant plusieurs tomes sont comptés pour un.
 
 
 
