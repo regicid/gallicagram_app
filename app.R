@@ -110,7 +110,7 @@ get_data <- function(mot,from,to,resolution,doc_type){
           date=str_c(y,"/",z)
           b<-as.integer(base$base_temp[base$date==date])}
         else if (resolution=="Année"){b<-as.integer(base$base_temp[base$date==y])}
-        else{}
+        if(length(b)==0L){b=0}
         tableau[nrow(tableau)+1,] = NA
         date=y
         if(resolution=="Mois"){date = paste(y,z,sep="/")}
@@ -125,6 +125,7 @@ get_data <- function(mot,from,to,resolution,doc_type){
         # ngram_base<-as.character(read_xml(url_base))
         # b<-str_extract(str_extract(ngram_base,"numberOfRecords>[:digit:]+"),"[:digit:]+")
         b<-as.integer(base$base_temp[base$date==y])
+        if(length(b)==0L){b=0}
         tableau[nrow(tableau)+1,] = NA
         date=y
         tableau[nrow(tableau),]<-c(date,a,b,mot)
