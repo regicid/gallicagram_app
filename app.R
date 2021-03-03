@@ -149,7 +149,7 @@ ui <- navbarPage("Gallicagram",
                                             conditionalPanel(condition="input.doc_type == 2",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
-                                            checkboxInput("barplot", "Afficher la distribution des numéros de presse\ndans la base Gallica", value = FALSE),
+                                            checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
                                             downloadButton('downloadData', 'Télécharger les données')
                                           ),
                                           
