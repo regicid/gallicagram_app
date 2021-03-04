@@ -169,7 +169,8 @@ ui <- navbarPage("Gallicagram",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
-                                            downloadButton('downloadData', 'Télécharger les données')
+                                            downloadButton('downloadData', 'Télécharger les données'),
+                                            downloadButton('downloadPlot', 'Télécharger le graphique interactif')
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
@@ -198,6 +199,13 @@ server <- function(input, output){
       },
       content = function(con) {
         write.csv(df$tableau, con)
+      })
+    output$downloadPlot <- downloadHandler(
+      filename = function() {
+        paste('plot-', Sys.Date(), '.html', sep='')
+      },
+      content = function(con) {
+        htmlwidgets::saveWidget(as_widget(Plot(df,input)), con)
       })
   })
   
