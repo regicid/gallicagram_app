@@ -149,7 +149,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titre){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
-liste_journaux<-read.csv("liste_journaux_gallica_quotidiens.csv")
+liste_journaux<-read.csv("liste_journaux.csv")
 
 
 ui <- navbarPage("Gallicagram",
