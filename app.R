@@ -58,8 +58,6 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
     base=read.csv("base_presse_mois.csv")
   } else if(doc_type==2){
     base=read.csv("base_livres_annees.csv")
-  }else if(doc_type==3){ ##### A MODIFIER
-    base=read.csv("base_livres_annees.csv")
   }
   
   
@@ -144,6 +142,10 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
+liste_journaux<-function(){
+  liste<-read.csv("liste_journaux_gallica_quotidiens.csv")
+  return(liste$title)
+}
 
 ui <- navbarPage("Gallicagram",
                  tabPanel("Graphique",fluidPage(),
@@ -155,7 +157,7 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
-                                            conditionalPanel(condition="input.doc_type == 3",selectInput("ark","Titre du journal",choices = a$title)),
+                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("ark","Titre du journal",choices = liste_journaux(),selected=NULL)),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
@@ -229,5 +231,7 @@ y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
+
+
 
 shinyApp(ui = ui, server = server)
