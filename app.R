@@ -81,18 +81,17 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
       mot1<-mots_or[1]}else{mot1=mot2}
       
       if(doc_type==3 & length(titres)>1){
-        ark1<-liste_journaux$ark[liste_journaux$title==titres[1]]
+        ark1<-titres[1]
         ark3<-""
         for (v in 2:length(titres)) 
         {
-          titre<-titres[v]
-          ark<-liste_journaux$ark[liste_journaux$title==titre]
+          ark<-titres[v]
           ark2<-str_c("%20or%20dc.relation%20any%20%22",ark,"%22")
           ark3<-str_c(ark3,ark2)
         }
       }else
       {
-        ark1<-liste_journaux$ark[liste_journaux$title==titres]
+        ark1<-titres
         ark3<-""
         }
       ###
@@ -177,7 +176,7 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
-                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = liste_journaux$title,selected=NULL,multiple = TRUE,options = list(create = TRUE))),
+                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$title),selected=NULL,multiple = TRUE,options = list(create = TRUE))),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
