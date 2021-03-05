@@ -24,7 +24,7 @@ Plot <- function(data,input){
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
   y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
-  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else{"livres\n"},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
+  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c (titre,"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
   legende=list(text = legende, showarrow=F, xref="paper", x=1, yref="paper", y=-0.5,
                align="right",
                font=list(size=12, color="black"))
@@ -46,7 +46,7 @@ Plot <- function(data,input){
   }
 }
 
-get_data <- function(mot,from,to,resolution,doc_type,ark){
+get_data <- function(mot,from,to,resolution,doc_type,titre){
   mots = str_split(mot,"&")[[1]]
   tableau<-as.data.frame(matrix(nrow=0,ncol=4),stringsAsFactors = FALSE)
   progress <- shiny::Progress$new()
@@ -89,7 +89,7 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
       if(resolution=="Mois"){I=1:12} #Pour faire ensuite une boucle sur les mois
       
       
-      if(doc_type != 2){
+      if(doc_type !=2){
       for(j in I){
         if(resolution=="Mois"){
           z = as.character(j)
@@ -97,16 +97,22 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
           beginning = str_c(y,"/",z,"/01")
           end = str_c(y,"/",z,"/",end_of_month[j])}
         url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&maximumRecords=1&page=1&collapsing=false&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(text%20adj%20%22",mot1,"%22%20",or,")%20%20and%20(dc.type%20all%20%22fascicule%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)&suggest=10&keywords=",mot1,or_end)
-        if(doc_type == 3){url <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=arkPress%20all%20%22",ark,"_date%22%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20%28gallica%20adj%20%22",mot,"%22%29%20sortby%20dc.date%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)")}
+        if(doc_type == 3){
+          ark<-liste_journaux$ark[liste_journaux$title==titre]
+          url <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=arkPress%20all%20%22",ark,"_date%22%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20%28gallica%20adj%20%22",mot,"%22%29%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)sortby%20dc.date%20")
+          }
         ngram<-as.character(read_xml(url))
         a<-str_extract(str_extract(ngram,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
-        # url_base<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&exactSearch=true&maximumRecords=1&page=1&collapsing=false&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22fascicule%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)&suggest=10&keywords=")
-        # ngram_base<-as.character(read_xml(url_base))
-        # b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
-        if(resolution=="Mois"){
+        
+        if(doc_type == 3){
+          url_base <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=arkPress%20all%20%22",ark,"_date%22%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date")
+          ngram_base<-as.character(read_xml(url_base))
+          b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
+        }
+        if(resolution=="Mois"& doc_type==1){
           date=str_c(y,"/",z)
           b<-as.integer(base$base_temp[base$date==date])}
-        else if (resolution=="Année"){b<-as.integer(base$base_temp[base$date==y])}
+        else if (resolution=="Année" & doc_type==1){b<-as.integer(base$base_temp[base$date==y])}
         if(length(b)==0L){b=0}
         tableau[nrow(tableau)+1,] = NA
         date=y
@@ -127,6 +133,7 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
         date=y
         tableau[nrow(tableau),]<-c(date,a,b,mot)
       }
+      
     }
     progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
   }
@@ -142,10 +149,8 @@ get_data <- function(mot,from,to,resolution,doc_type,ark){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
-liste_journaux<-function(){
-  liste<-read.csv("liste_journaux_gallica_quotidiens.csv")
-  return(liste$title)
-}
+liste_journaux<-read.csv("liste_journaux_gallica_quotidiens.csv")
+
 
 ui <- navbarPage("Gallicagram",
                  tabPanel("Graphique",fluidPage(),
@@ -157,7 +162,7 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
-                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("ark","Titre du journal",choices = liste_journaux(),selected=NULL)),
+                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titre","Titre du journal",choices = liste_journaux$title,selected=NULL)),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
@@ -191,7 +196,7 @@ server <- function(input, output){
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
-    df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$ark)
+    df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titre)
     output$plot <- renderPlotly({Plot(df,input)})
     if(input$barplot){
       output$plot1 <- renderPlotly({Plot1(df,input)})}
