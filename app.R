@@ -24,7 +24,7 @@ Plot <- function(data,input){
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
   y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
-  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c (input$titres,"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
+  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c(paste(filter(liste_journaux,ark==input$titres),collapse=" - "),"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
   legende=list(text = legende, showarrow=F, xref="paper", x=1, yref="paper", y=-0.5,
                align="right",
                font=list(size=12, color="black"))
