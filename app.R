@@ -233,19 +233,21 @@ server <- function(input, output){
   
 }
 Barplot1 <- function(){table<-read.csv("base_presse_annees.csv")
+somme<-sum(table$base_temp)
 table$hovers = str_c(table$date,": N = ",table$base_temp)
 plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-Title = paste("<b>Répartition des numéros de presse océrisés dans Gallica<b>")
+Title = paste("<b>Répartition des ",somme," numéros de presse océrisés dans Gallica<b>")
 y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
 Barplot2 <- function(){table<-read.csv("base_livres_annees.csv")
+somme<-sum(table$base_temp)
 table<-table[table$date>=1450,]
 table$hovers = str_c(table$date,": N = ",table$base_temp)
 plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-Title = paste("<b>Répartition des livres océrisés dans Gallica<b>")
+Title = paste("<b>Répartition des ",somme," livres océrisés dans Gallica<b>")
 y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
