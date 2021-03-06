@@ -209,7 +209,7 @@ server <- function(input, output,session){
     input$doc_type,
     if(input$doc_type==3)
       {
-        liste_journaux<-read.csv("liste_journaux.csv")
+        liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         updateSelectizeInput(session,"titres",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r")
       }
   )
