@@ -24,7 +24,7 @@ Plot <- function(data,input){
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
   y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
-  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c(paste(filter(liste_journaux,ark==input$titres),collapse=" - "),"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
+  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c(input$titres,"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
   legende=list(text = legende, showarrow=F, xref="paper", x=1, yref="paper", y=-0.5,
                align="right",
                font=list(size=12, color="black"))
@@ -163,7 +163,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
-liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
+
 
 
 ui <- navbarPage("Gallicagram",
@@ -176,7 +176,7 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
-                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$title),selected=NULL,multiple = TRUE,options = list(create = TRUE))),
+                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE,options = list(create = TRUE))),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
@@ -204,7 +204,15 @@ ui <- navbarPage("Gallicagram",
 
 
 # Define server logic required to draw a histogram
-server <- function(input, output){
+server <- function(input, output,session){
+  observeEvent(
+    input$doc_type,
+    if(input$doc_type==3)
+      {
+        liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
+        updateSelectizeInput(session,"titres",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r")
+      }
+  )
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   observeEvent(input$do,{
