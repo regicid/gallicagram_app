@@ -13,11 +13,12 @@
 
 ## Options de recherche
 - L'utilisateur peut chercher un syntagme unique (ex. Clemenceau).
-- Il peut aussi comparer les évolutions respectives de deux syntagmes concurrents en les séparants par une esperluette "&" (ex. Georges Clemenceau&Aristide Briand).
+- Il peut aussi comparer les évolutions respectives de deux syntagmes concurrents en les séparant par une esperluette "&" (ex. Georges Clemenceau&Aristide Briand).
 - Il peut enfin effectuer une recherche conditionnelle de forme OU en utilisant le signe "+" (ex. juif+juive). Il s'agit d'un "ou" inclusif qui renverra tous les numéros contenant les termes séparés par un "+". La recherche exacte de Gallica dénombre des syntagmes exacts et isolés. Ainsi, entrer le mot "juif" ne permettra pas d'obtenir les résultats correspondant à son pluriel : "juifs". La recherche conditionnelle OU avec "+" permet d'intégrer ces résultats.
 - Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&calviniste+huguenot+parpaillot)
 - L'utilisateur peut choisir parmi deux corpus de recherche : la presse de Gallica (journaux et revues) et les livres de Gallica (monographies).
 - Le corpus de presse peut être analysé à l'échelle mensuelle ou à l'échelle annuelle/le corpus de livres ne peut être analysé qu'à l'échelle annuelle.
+- L'utilisateur peut effectuer sa recherche dans un nombre restreint de titres de presse, maîtrisant ainsi lui-même le corpus (Recherche par titre de presse). Il peut sélectionner un ou plusieurs titres. La liste des titres est triée dans l'ordre décroissant des numéros de presse disponibles dans Gallica.
 
 ## Traitements
 
@@ -33,7 +34,7 @@ Une fonctionnalité de lissage de type loess dont l’intensité est échelonné
 
 ## Corpus de presse
 
-- Le corpus de presse de Gallica ne représente qu’une petite portion du corpus de presse de la Bibliothèque nationale de France. Ce corpus est toujours en cours de numérisation et d’océrisation et seule une partie du corpus numérisé est océrisé. C’est pourquoi le dénominateur extrait par Gallicagram peut varier d’un jour à l’autre. A ce jour, 17 430 titres sont numérisés dont 12 731 océrisés.
+- Le corpus de presse de Gallica ne représente qu’une petite portion du corpus de presse de la Bibliothèque nationale de France. Ce corpus est toujours en cours de numérisation et d’océrisation et seule une partie du corpus numérisé est océrisé. C’est pourquoi le dénominateur extrait par Gallicagram peut varier d’un jour à l’autre. À ce jour, 17 430 titres sont numérisés dont 12 731 océrisés.
 - Le corpus de presse de Gallica n’est pas homogène en volume au cours du temps. Certaines périodes contiennent plus de titres que d’autres, c’est le cas notamment de l’entre-deux-guerres. Le calcul de la fréquence permet donc de contourner cette difficulté en rapportant le nombre de résultats au volume du corpus. Cependant, lorsque le corpus est trop mince, ces résultats peuvent perdre de leur significativité. Il revient ainsi à l’utilisateur de prendre en compte ce paramètre dans l’usage qu’il fait de Gallicagram et dans son interprétation des résultats.
 - Le corpus de presse de Gallica n’est pas non plus homogène selon les thématiques ni le type de fascicule. S’y trouvent tant des revues mensuelles que des hebdomadaires, mais aussi des quotidiens, dans des domaines aussi divers que la politique, la littérature ou la philosophie. Cette répartition thématique varie aussi au cours du temps au gré de l’apparition et de la disparition de certains titres de presse. Il faut noter que Gallicagram ne donne aucune indication sur le lectorat, et donc sur la popularité réelle des termes ou des personnages recherchés.
 - Le corpus de presse numérisé contient bon nombre de revues annuelles qui créent un pic en valeur absolue en janvier.
@@ -43,7 +44,7 @@ Une fonctionnalité de lissage de type loess dont l’intensité est échelonné
 ## Corpus de livres
 
 - Gallicagram ne compte pas le nombre de citations du terme de recherche dans la masse des livres, mais le nombre de livres figurant le terme recherché. Il diffère en cela de [Google Ngram Viewer] (https://books.google.com/ngrams/graph?content=Abel+Bonnard%2CMarcel+Proust&year_start=1890&year_end=2019&corpus=30&smoothing=3)
-- Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaitre de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurrence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurrence.
+- Les interprétations du résultat de recherche dans le corpus de livres doivent être élaborées avec précaution. Ce corpus rassemblant des textes volumineux, les termes courants de la langue française y apparaissent très fréquemment faisant apparaître de fortes corrélations dans les évolutions au fil du temps qui ne correspondent pas à des résultats significatifs. Il est donc préférable d'y rechercher des termes peu courants (fréquence d'occurrence<5%) ou des syntagmes contenant plusieurs mots, présentant eux aussi de faibles fréquences d'occurrence.
 - Les ouvrages comprenant plusieurs tomes sont comptés pour un.
 
 
