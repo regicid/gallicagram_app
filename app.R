@@ -163,6 +163,17 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
 data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
 names(data)=c("tableau","mot","resolution")
 
+correlation<-function(data,input){
+  tableau = data[["tableau"]]
+  mots<-str_split(input$mot,"&")
+  tableau<-cbind(tableau$ratio_temp[tableau$mot==unlist(mots)[1]],tableau$ratio_temp[tableau$mot==unlist(mots)[2]])
+  tableau<-as.data.frame(tableau)
+  corr<-lm(V2~V1,tableau)
+  r_carré<-round(summary(corr)$r.squared,digits=3)
+  p_value<-round(anova(corr)$'Pr(>F)'[1],digits=3)
+  texte<-str_c("Corrélation linéaire ",unlist(mots)[2],"~",unlist(mots)[1],": R²=",r_carré," p-value=",p_value)
+  return(texte)
+}
 
 ui <- navbarPage("Gallicagram",
                  tabPanel("Graphique",fluidPage(),
@@ -188,12 +199,14 @@ ui <- navbarPage("Gallicagram",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
+                                            checkboxInput("correlation_test", "Calculer le coefficient de corrélation linéaire\nentre les deux premiers termes recherchés", value = FALSE),
                                             downloadButton('downloadData', 'Télécharger les données'),
                                             downloadButton('downloadPlot', 'Télécharger le graphique interactif')
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
+                                                    conditionalPanel(condition="input.correlation_test",fluidRow(textOutput("corr"),align="left")),
                                                     fluidRow(textOutput("legende"),align="right"),
                                                     fluidRow(textOutput("legende0"),align="right"),
                                                     fluidRow(textOutput("legende1"),align="right"),
@@ -222,18 +235,13 @@ server <- function(input, output,session){
   output$plot <- renderPlotly({Plot(data,input)})
   output$legende=renderText("Source : gallica.bnf.fr")
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
+  output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," numéros épluchés\n"))
+  output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
   observeEvent(input$doc_type,
-               {tableau = data[["tableau"]]
+               {
                output$legende1<-renderText(str_c("Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{paste(names(input$titres),"\n")}))
                })
-  observeEvent(input$doc_type,
-               {tableau = data[["tableau"]]
-               output$legende2<-renderText(str_c(as.character(sum(tableau$base_temp))," numéros épluchés\n"))
-               })
-  observeEvent(input$doc_type,
-               {tableau = data[["tableau"]]
-               output$legende3<-renderText(str_c(as.character(sum(tableau$nb_temp))," résultats trouvés"))
-               })
+
   
   observeEvent(input$do,{
     datasetInput <- reactive({
@@ -242,6 +250,9 @@ server <- function(input, output,session){
     
     output$plot <- renderPlotly({Plot(df,input)})
     
+    output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base_temp))," numéros épluchés\n"))
+    output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$nb_temp))," résultats trouvés"))
+    output$corr<-renderText(correlation(df,input))
     
     output$downloadData <- downloadHandler(
       filename = function() {
@@ -257,8 +268,8 @@ server <- function(input, output,session){
       content = function(con) {
         htmlwidgets::saveWidget(as_widget(Plot(df,input)), con)
       })
-  })
-  
+    })
+
   
 }
 Barplot1 <- function(){table<-read.csv("base_presse_annees.csv")
