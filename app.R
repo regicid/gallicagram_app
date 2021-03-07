@@ -164,14 +164,16 @@ data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Ann�
 names(data)=c("tableau","mot","resolution")
 
 correlation<-function(data,input){
-  tableau = data[["tableau"]]
   mots<-str_split(input$mot,"&")
+  if(length(unlist(mots))>=2 & unlist(mots)[2]!=""){
+  tableau = data[["tableau"]]
   tableau<-cbind(tableau$ratio_temp[tableau$mot==unlist(mots)[1]],tableau$ratio_temp[tableau$mot==unlist(mots)[2]])
   tableau<-as.data.frame(tableau)
   r<-round(cor.test(x=tableau$V1,y=tableau$V2)$estimate,digits=3)
   p_value<-round(cor.test(x=tableau$V1,y=tableau$V2)$p.value,digits=3)
   texte<-str_c("Corrélation ",unlist(mots)[1],"~",unlist(mots)[2],": r=",r," p-value=",p_value)
-  return(texte)
+  return(texte)}
+  else {return("")}
 }
 
 ui <- navbarPage("Gallicagram",
