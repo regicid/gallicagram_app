@@ -186,7 +186,7 @@ ui <- navbarPage("Gallicagram",
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
-                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE,options = list(create = TRUE))),
+                                            conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
                                             numericInput("beginning","Début",1914),
                                             numericInput("end","Fin",1920),
                                             sliderInput("span",
@@ -241,7 +241,8 @@ server <- function(input, output,session){
   output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
   observeEvent(input$doc_type,
                {
-               output$legende1<-renderText(str_c("Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{paste(names(input$titres),"\n")}))
+                 titres<-reactive({input$titres})
+                 output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"} else{paste(titres(),"\n")}))
                })
 
   
