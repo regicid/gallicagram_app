@@ -24,10 +24,6 @@ Plot <- function(data,input){
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
   y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
-  legende=str_c("Source : gallica.bnf.fr\n","Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{str_c(names(input$titres),"\n")},as.character(sum(tableau$base_temp))," numéros épluchés\n",as.character(sum(tableau$nb_temp))," résultats trouvés")
-  legende=list(text = legende, showarrow=F, xref="paper", x=1, yref="paper", y=-0.5,
-               align="right",
-               font=list(size=12, color="black"))
     plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
   if(input$barplot){
@@ -41,7 +37,7 @@ Plot <- function(data,input){
     plot = subplot(plot,plot1,nrows = 2,legend=NULL,shareX = T)
     return(plot)
   } else{
-    plot=layout(plot,margin = list(b = 150),annotations =legende)
+    plot=layout(plot)
     return(plot)
   }
 }
@@ -197,7 +193,13 @@ ui <- navbarPage("Gallicagram",
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
-                                                    plotlyOutput("plot1")))),
+                                                    fluidRow(textOutput("legende"),align="right"),
+                                                    fluidRow(textOutput("legende0"),align="right"),
+                                                    fluidRow(textOutput("legende1"),align="right"),
+                                                    fluidRow(textOutput("legende2"),align="right"),
+                                                    fluidRow(textOutput("legende3"),align="right"),
+                                                    p("")
+                                                    ))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres"))
 )
@@ -217,6 +219,21 @@ server <- function(input, output,session){
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
+  output$legende=renderText("Source : gallica.bnf.fr")
+  output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
+  observeEvent(input$doc_type,
+               {tableau = data[["tableau"]]
+               output$legende1<-renderText(str_c("Corpus : ",if(input$doc_type==1){"presse\n"} else if (input$doc_type==2){"livres\n"} else{paste(names(input$titres),"\n")}))
+               })
+  observeEvent(input$doc_type,
+               {tableau = data[["tableau"]]
+               output$legende2<-renderText(str_c(as.character(sum(tableau$base_temp))," numéros épluchés\n"))
+               })
+  observeEvent(input$doc_type,
+               {tableau = data[["tableau"]]
+               output$legende3<-renderText(str_c(as.character(sum(tableau$nb_temp))," résultats trouvés"))
+               })
+  
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
@@ -224,8 +241,7 @@ server <- function(input, output,session){
     
     output$plot <- renderPlotly({Plot(df,input)})
     
-    if(input$barplot){
-      output$plot1 <- renderPlotly({Plot1(df,input)})}
+    
     output$downloadData <- downloadHandler(
       filename = function() {
         paste('data-', Sys.Date(), '.csv', sep='')
