@@ -34,6 +34,7 @@ Plot <- function(data,input){
     y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
     x <- list(title = data[["resolution"]],titlefont = 41)
     plot1 = layout(plot1, yaxis = y, xaxis = x,title = Title,showlegend = FALSE)
+    plot= plot%>%add_lines()
     plot = subplot(plot,plot1,nrows = 2,legend=NULL,shareX = T)
     return(plot)
   } else{
