@@ -170,7 +170,7 @@ correlation<-function(data,input){
   tableau<-as.data.frame(tableau)
   r<-round(cor.test(x=tableau$V1,y=tableau$V2)$estimate,digits=3)
   p_value<-round(cor.test(x=tableau$V1,y=tableau$V2)$p.value,digits=3)
-  texte<-str_c("Corrélation linéaire ",unlist(mots)[1],"~",unlist(mots)[2],": R=",r," p-value=",p_value)
+  texte<-str_c("Corrélation ",unlist(mots)[1],"~",unlist(mots)[2],": r=",r," p-value=",p_value)
   return(texte)
 }
 
@@ -232,6 +232,7 @@ server <- function(input, output,session){
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
+  output$corr<-renderText(correlation(data,input))
   output$legende=renderText("Source : gallica.bnf.fr")
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," numéros épluchés\n"))
