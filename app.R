@@ -163,7 +163,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
-
+data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
+names(data)=c("tableau","mot","résolution")
 
 
 ui <- navbarPage("Gallicagram",
@@ -172,7 +173,7 @@ ui <- navbarPage("Gallicagram",
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
-                                            textInput("mot","Terme(s) à chercher","Clemenceau"),
+                                            textInput("mot","Terme(s) à chercher","Joffre&Pétain&Foch"),
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus :",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
@@ -215,11 +216,14 @@ server <- function(input, output,session){
   )
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
+  output$plot <- renderPlotly({Plot(data,input)})
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
     df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)
+    
     output$plot <- renderPlotly({Plot(df,input)})
+    
     if(input$barplot){
       output$plot1 <- renderPlotly({Plot1(df,input)})}
     output$downloadData <- downloadHandler(
@@ -227,7 +231,7 @@ server <- function(input, output,session){
         paste('data-', Sys.Date(), '.csv', sep='')
       },
       content = function(con) {
-        write.csv(df$tableau, con)
+        write.csv(df$tableau, con,row.names = F,fileEncoding = "UTF-8")
       })
     output$downloadPlot <- downloadHandler(
       filename = function() {
