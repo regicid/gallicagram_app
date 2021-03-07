@@ -160,7 +160,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   return(data)}
 
 data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
-names(data)=c("tableau","mot","résolution")
+names(data)=c("tableau","mot","resolution")
 
 
 ui <- navbarPage("Gallicagram",
