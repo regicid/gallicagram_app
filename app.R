@@ -168,10 +168,9 @@ correlation<-function(data,input){
   mots<-str_split(input$mot,"&")
   tableau<-cbind(tableau$ratio_temp[tableau$mot==unlist(mots)[1]],tableau$ratio_temp[tableau$mot==unlist(mots)[2]])
   tableau<-as.data.frame(tableau)
-  corr<-lm(V2~V1,tableau)
-  r_carré<-round(summary(corr)$r.squared,digits=3)
-  p_value<-round(anova(corr)$'Pr(>F)'[1],digits=3)
-  texte<-str_c("Corrélation linéaire ",unlist(mots)[2],"~",unlist(mots)[1],": R²=",r_carré," p-value=",p_value)
+  r<-round(cor.test(x=tableau$V1,y=tableau$V2)$estimate,digits=3)
+  p_value<-round(cor.test(x=tableau$V1,y=tableau$V2)$p.value,digits=3)
+  texte<-str_c("Corrélation linéaire ",unlist(mots)[1],"~",unlist(mots)[2],": R=",r," p-value=",p_value)
   return(texte)
 }
 
