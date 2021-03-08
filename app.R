@@ -2,7 +2,7 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(stringr)
-
+library(Hmisc)
 library(xml2)
 library(markdown)
 library(shinythemes)
@@ -163,17 +163,81 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
 data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
 names(data)=c("tableau","mot","resolution")
 
-correlation<-function(data,input){
-  mots<-str_split(input$mot,"&")
-  if(length(unlist(mots))>=2 & unlist(mots)[2]!=""){
-  tableau = data[["tableau"]]
-  tableau<-cbind(tableau$ratio_temp[tableau$mot==unlist(mots)[1]],tableau$ratio_temp[tableau$mot==unlist(mots)[2]])
-  tableau<-as.data.frame(tableau)
-  r<-round(cor.test(x=tableau$V1,y=tableau$V2)$estimate,digits=3)
-  p_value<-round(cor.test(x=tableau$V1,y=tableau$V2)$p.value,digits=3)
-  texte<-str_c("Corrélation ",unlist(mots)[1],"~",unlist(mots)[2],": r=",r," p-value=",p_value)
-  return(texte)}
-  else {return("")}
+
+correlation_matrix <- function(df, 
+                               type = "pearson",
+                               digits = 3, 
+                               decimal.mark = ".",
+                               use = "all", 
+                               show_significance = TRUE, 
+                               replace_diagonal = TRUE, 
+                               replacement = ""){
+  
+ df=df[["tableau"]]
+ df=select(df,mot,ratio_temp)
+ mots<-unlist(unique(df$mot))
+ a<-df$ratio_temp[df$mot==mots[1]]
+ for (i in 2:length(mots)) {
+   a<-cbind(a,df$ratio_temp[df$mot==mots[i]])
+ }
+ df=as.data.frame(a)
+ colnames(df)=mots
+   # check arguments
+  stopifnot({
+    is.numeric(digits)
+    digits >= 0
+    use %in% c("all", "upper", "lower")
+    is.logical(replace_diagonal)
+    is.logical(show_significance)
+    is.character(replacement)
+  })
+  # we need the Hmisc package for this
+  require(Hmisc)
+  
+  # retain only numeric and boolean columns
+  isNumericOrBoolean = vapply(df, function(x) is.numeric(x) | is.logical(x), logical(1))
+  if (sum(!isNumericOrBoolean) > 0) {
+    cat('Dropping non-numeric/-boolean column(s):', paste(names(isNumericOrBoolean)[!isNumericOrBoolean], collapse = ', '), '\n\n')
+  }
+  df = df[isNumericOrBoolean]
+  
+  # transform input data frame to matrix
+  x <- as.matrix(df)
+  
+  # run correlation analysis using Hmisc package
+  correlation_matrix <- Hmisc::rcorr(x, type = )
+  R <- correlation_matrix$r # Matrix of correlation coeficients
+  p <- correlation_matrix$P # Matrix of p-value 
+  
+  # transform correlations to specific character format
+  Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
+  
+  # if there are any negative numbers, we want to put a space before the positives to align all
+  if (sum(R < 0) > 0) {
+    Rformatted = ifelse(R > 0, paste0(' ', Rformatted), Rformatted)
+  }
+  
+  # add significance levels if desired
+  if (show_significance) {
+    # define notions for significance levels; spacing is important.
+    stars <- ifelse(is.na(p), "   ", ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "*  ", "   "))))
+    Rformatted = paste0(Rformatted, stars)
+  }
+  # build a new matrix that includes the formatted correlations and their significance stars
+  Rnew <- matrix(Rformatted, ncol = ncol(x))
+  rownames(Rnew) <- colnames(x)
+  colnames(Rnew) <- paste(colnames(x), "", sep =" ")
+  
+  # replace undesired values
+  if (use == 'upper') {
+    Rnew[lower.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (use == 'lower') {
+    Rnew[upper.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (replace_diagonal) {
+    diag(Rnew) <- replacement
+  }
+  
+  return(Rnew)
 }
 
 ui <- navbarPage("Gallicagram",
@@ -200,14 +264,15 @@ ui <- navbarPage("Gallicagram",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
-                                            checkboxInput("correlation_test", "Calculer le coefficient de corrélation linéaire\nentre les deux premiers termes recherchés", value = FALSE),
+                                            checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
                                             downloadButton('downloadData', 'Télécharger les données'),
                                             downloadButton('downloadPlot', 'Télécharger le graphique interactif')
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
-                                                    conditionalPanel(condition="input.correlation_test",fluidRow(textOutput("corr"),align="left")),
+                                                    conditionalPanel(condition="input.correlation_test",tableOutput("corr")),
+                                                    conditionalPanel(condition="input.correlation_test",fluidRow(textOutput("pvalue"),align="left")),
                                                     fluidRow(textOutput("legende"),align="right"),
                                                     fluidRow(textOutput("legende0"),align="right"),
                                                     fluidRow(textOutput("legende1"),align="right"),
@@ -234,11 +299,27 @@ server <- function(input, output,session){
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
-  output$corr<-renderText(correlation(data,input))
+  output$corr<-renderTable(correlation_matrix(data),rownames = TRUE)
+  output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
   output$legende=renderText("Source : gallica.bnf.fr")
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," numéros épluchés\n"))
   output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste('data-', Sys.Date(), '.csv', sep='')
+    },
+    content = function(con) {
+      write.csv(data$tableau, con,row.names = F,fileEncoding = "UTF-8")
+    })
+  output$downloadPlot <- downloadHandler(
+    filename = function() {
+      paste('plot-', Sys.Date(), '.html', sep='')
+    },
+    content = function(con) {
+      htmlwidgets::saveWidget(as_widget(Plot(data,input)), con)
+    })
+  
   observeEvent(input$doc_type,
                {
                  titres<-reactive({input$titres})
@@ -255,7 +336,7 @@ server <- function(input, output,session){
     
     output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base_temp))," numéros épluchés\n"))
     output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$nb_temp))," résultats trouvés"))
-    output$corr<-renderText(correlation(df,input))
+    output$corr<-renderTable(correlation_matrix(df),rownames = TRUE)
     
     output$downloadData <- downloadHandler(
       filename = function() {
