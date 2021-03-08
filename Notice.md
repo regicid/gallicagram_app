@@ -22,15 +22,16 @@
 
 ## Traitements
 
-Le traitement des données extraites consiste au calcul pour chaque sous-séquence temporelle de la fréquence d’apparition du terme défini par l’utilisateur. Cette fréquence nommée « ratio_temp » est le rapport des deux variables extraites soit pour une sous-séquence temporelle  : 
+ - Le traitement des données extraites consiste au calcul pour chaque sous-séquence temporelle de la fréquence d’apparition du terme défini par l’utilisateur. Cette fréquence nommée « ratio_temp » est le rapport des deux variables extraites soit pour une sous-séquence temporelle  : 
 <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML"></script>
 
 \\[ratio_i=\frac{count_i}{base_i} =\frac{x_i}{N_i}\\]
 
 
-Le graphique présente cette fréquence en ordonnées et le temps en abscisses selon l’échelle sélectionnée. La courbe qu’il figure relie les points calculés par l’ordinateur. Des étiquettes interactives indiquent les valeurs absolues  et  lorsque l’utilisateur passe le curseur sur les points du graphique.
-Une fonctionnalité de lissage de type loess dont l’intensité est échelonnée de 0 à 10 permet d’estomper graphiquement les fluctuations. 
+- Le graphique présente cette fréquence en ordonnées et le temps en abscisses selon l’échelle sélectionnée. La courbe qu’il figure relie les points calculés par l’ordinateur. Des étiquettes interactives indiquent les valeurs absolues ainsi que le dénominateur N lorsque l’utilisateur passe le curseur sur les points du graphique.
+- Une fonctionnalité de lissage de type loess dont l’intensité est échelonnée de 0 à 10 permet d’estomper graphiquement les fluctuations.
+- Une matrice de corrélation peut être affichée en cochant la case correspondante dans le panneau latéral.
 
 ## Corpus de presse
 

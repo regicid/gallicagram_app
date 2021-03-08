@@ -264,13 +264,13 @@ ui <- navbarPage("Gallicagram",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
-                                            checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
-                                            downloadButton('downloadData', 'Télécharger les données'),
-                                            downloadButton('downloadPlot', 'Télécharger le graphique interactif')
+                                            checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE)
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     headerPanel(""),
+                                                    div(style="display: inline-block;vertical-align:top",downloadButton('downloadData', 'Télécharger les données')),
+                                                    div(style="display: inline-block;vertical-align:top",downloadButton('downloadPlot', 'Télécharger le graphique interactif')),
                                                     conditionalPanel(condition="input.correlation_test",tableOutput("corr")),
                                                     conditionalPanel(condition="input.correlation_test",fluidRow(textOutput("pvalue"),align="left")),
                                                     fluidRow(textOutput("legende"),align="right"),
