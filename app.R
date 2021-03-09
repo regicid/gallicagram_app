@@ -8,6 +8,14 @@ library(markdown)
 library(shinythemes)
 data = list()
 
+js <- "
+function(el, x) {
+el.on('plotly_click', function(d) {
+var point = d.points[0];
+var url = point.data.customdata[point.pointIndex];
+window.open(url);
+});
+}"
 
 Plot <- function(data,input){
   tableau = data[["tableau"]]
@@ -21,10 +29,11 @@ Plot <- function(data,input){
     tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
   }
   tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
-  plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text")
+  plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
+  #plot = onRender(plot,js)
   y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
-    plot = layout(plot, yaxis = y, xaxis = x,title = Title)
+  plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
   if(input$barplot){
     width = nrow(tableau)
@@ -36,16 +45,16 @@ Plot <- function(data,input){
     plot1 = layout(plot1, yaxis = y, xaxis = x,title = Title,showlegend = FALSE)
     plot= plot%>%add_lines()
     plot = plotly::subplot(plot,plot1,nrows = 2,legend=NULL,shareX = T)
-    return(plot)
+    return(onRender(plot,js))
   } else{
     plot=layout(plot)
-    return(plot)
+    return(onRender(plot,js))
   }
 }
 
 get_data <- function(mot,from,to,resolution,doc_type,titres){
   mots = str_split(mot,"&")[[1]]
-  tableau<-as.data.frame(matrix(nrow=0,ncol=4),stringsAsFactors = FALSE)
+  tableau<-as.data.frame(matrix(nrow=0,ncol=5),stringsAsFactors = FALSE)
   progress <- shiny::Progress$new()
   on.exit(progress$close())
   progress$set(message = "Patience...", value = 0)
@@ -128,7 +137,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         tableau[nrow(tableau)+1,] = NA
         date=y
         if(resolution=="Mois"){date = paste(y,z,sep="/")}
-        tableau[nrow(tableau),]<-c(date,a,b,mot)
+        tableau[nrow(tableau),]<-c(date,a,b,mot,url)
       }}
       
       if(doc_type==2){
@@ -142,13 +151,15 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         if(length(b)==0L){b=0}
         tableau[nrow(tableau)+1,] = NA
         date=y
-        tableau[nrow(tableau),]<-c(date,a,b,mot)
+        tableau[nrow(tableau),]<-c(date,a,b,mot,url)
       }
       
     }
     progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
   }
-  colnames(tableau)<-c("date","nb_temp","base_temp","mot")
+  colnames(tableau)<-c("date","nb_temp","base_temp","mot","url")
+  tableau$url = str_replace(tableau$url,"SRU","services/engine/search/sru")
+  tableau$url = str_replace(tableau$url,"maximumRecords=1","maximumRecords=25")
   format = "%Y"
   if(resolution=="Mois"){format=paste(format,"%m",sep="/")}
   tableau.date = as.Date(as.character(tableau$date),format=format)
