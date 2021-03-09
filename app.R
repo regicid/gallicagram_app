@@ -6,6 +6,7 @@ library(Hmisc)
 library(xml2)
 library(markdown)
 library(shinythemes)
+library(htmlwidgets)
 data = list()
 
 js <- "
