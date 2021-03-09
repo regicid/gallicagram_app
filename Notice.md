@@ -3,6 +3,7 @@
 - Gallicagram est un programme représentant graphiquement l’évolution au cours du temps de la fréquence d’apparition d’un terme dans le corpus de presse ou de livres de [Gallica](https://gallica.bnf.fr/). 
 - Développé par [Benjamin Azoulay](https://github.com/benjyazoulay/) et [Benoît de Courson](https://regicid.github.io/), il est intégralement rédigé en langage [R](https://www.r-project.org/) et présente une interface graphique interactive [Shiny](https://shiny.rstudio.com/).
 - Les données produites sont téléchargeables par l’utilisateur. Le [code source](https://github.com/regicid/gallicagram_app) de Gallicagram est libre d'accès et de droits.
+- L'analyse de la structure des recherches dans le corpus de presse peut être réalisée dans [Gallicapresse](http://gallicagram.hopto.org:3838/gallicapresse/).
 
 
 ## Extraction
@@ -32,6 +33,7 @@
 - Le graphique présente cette fréquence en ordonnées et le temps en abscisses selon l’échelle sélectionnée. La courbe qu’il figure relie les points calculés par l’ordinateur. Des étiquettes interactives indiquent les valeurs absolues ainsi que le dénominateur N lorsque l’utilisateur passe le curseur sur les points du graphique.
 - Une fonctionnalité de lissage de type loess dont l’intensité est échelonnée de 0 à 10 permet d’estomper graphiquement les fluctuations.
 - Une matrice de corrélation peut être affichée en cochant la case correspondante dans le panneau latéral.
+- En cliquant sur un point du graphique, l'utilisateur lance automatiquement la recherche correspondante dans Gallica (pour le terme, la sous-période et le corpus indiqués).
 
 ## Corpus de presse
 
@@ -41,6 +43,7 @@
 - Le corpus de presse numérisé contient bon nombre de revues annuelles qui créent un pic en valeur absolue en janvier.
 - Le corpus de presse de Gallica n’est pas homogène géographiquement. Les journaux tirés à Paris, dont certains sont nationaux, sont plus nombreux que les titres de la presse régionale.
 - Gallicagram ne compte pas le nombre d’articles, mais bien le nombre de numéros présentant au moins une fois le terme recherché. Ainsi, un numéro de presse mentionnant cent fois le terme recherché ne pèsera pas plus dans le calcul de l’indicateur qu’un numéro de presse où ce terme n’apparaît qu’une seule fois.
+- L'application [Gallicapresse](http://gallicagram.hopto.org:3838/gallicapresse/), la recherche par titre(s) de presse et le lancement automatique de la recherche correspondant à un point du graphique dans Gallica sont autant d'outils qui permettent d'analyser et de maîtriser le corpus.
 
 ## Corpus de livres
 
