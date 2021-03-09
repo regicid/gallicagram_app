@@ -281,7 +281,8 @@ ui <- navbarPage("Gallicagram",
                                                     p("")
                                                     ))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
-                 tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres"))
+                 tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres")),
+                 tabPanel(title=HTML("<li><a href='http://gallicagram.hopto.org:3838/gallicapresse/' target='_blank'>Gallicapresse"))
 )
 
 
