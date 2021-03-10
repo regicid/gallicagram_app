@@ -33,6 +33,7 @@
 - Le graphique présente cette fréquence en ordonnées et le temps en abscisses selon l’échelle sélectionnée. La courbe qu’il figure relie les points calculés par l’ordinateur. Des étiquettes interactives indiquent les valeurs absolues ainsi que le dénominateur N lorsque l’utilisateur passe le curseur sur les points du graphique.
 - Une fonctionnalité de lissage de type loess dont l’intensité est échelonnée de 0 à 10 permet d’estomper graphiquement les fluctuations.
 - Une matrice de corrélation peut être affichée en cochant la case correspondante dans le panneau latéral.
+- Une option du panneau latéral permet la représentation graphique de la différence entre les fréquences correspondant aux deux premiers termes (ou groupes de termes) recherchés. Elle permet d'observer finement la coévolution de deux termes corrélés.
 - En cliquant sur un point du graphique, l'utilisateur lance automatiquement la recherche correspondante dans Gallica (pour le terme, la sous-période et le corpus indiqués).
 
 ## Corpus de presse
