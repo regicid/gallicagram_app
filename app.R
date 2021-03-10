@@ -39,9 +39,10 @@ Plot <- function(data,input){
   
   if(input$delta==TRUE){
     mots<-str_split(input$mot,"&")
-    tableau$delta[tableau$mot==unlist(mots)[1]]<-tableau$ratio_temp[tableau$mot==unlist(mots)[1]]-tableau$ratio_temp[tableau$mot==unlist(mots)[2]]
+    x = 1:sum(tableau$mot==unlist(mots)[1])
+    tableau$delta[tableau$mot==unlist(mots)[1]]<-loess((tableau$ratio_temp[tableau$mot==unlist(mots)[1]]-tableau$ratio_temp[tableau$mot==unlist(mots)[2]]~x),span=span)$fitted
     tableau$hovers2 = str_c(tableau$date,": delta = ",round(tableau$delta*100,digits=2),"%, N = ",tableau$base_temp)
-    plot = plot_ly(tableau, x=~date[tableau$mot==unlist(mots)[1]],y=~delta[tableau$mot==unlist(mots)[1]],text=~hovers2[tableau$mot==unlist(mots)[1]],type='scatter',mode='spline',hoverinfo="text")
+    plot = plot_ly(filter(tableau,mot==unlist(mots)[[1]]), x=~date,y=~delta,text=~hovers2,type='scatter',mode='spline',hoverinfo="text")
     y <- list(title = "Différence de fréquence\nd'occurence dans le corpus",titlefont = 41,tickformat = ".1%")
     x <- list(title = data[["resolution"]],titlefont = 41)
     Title = paste("Freq(",unlist(mots)[1],") – Freq(",unlist(mots)[2],")")
@@ -151,6 +152,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         date=y
         if(resolution=="Mois"){date = paste(y,z,sep="/")}
         tableau[nrow(tableau),]<-c(date,a,b,mot,url)
+        progress$inc(1/((to-from+1)*length(I)*length(mots)), detail = paste("Gallicagram ratisse l'an", i))
       }}
       
       if(doc_type==2){
@@ -168,7 +170,6 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
       }
       
     }
-    progress$inc(1/(to-from), detail = paste("Gallicagram ratisse l'an", i))
   }
   colnames(tableau)<-c("date","nb_temp","base_temp","mot","url")
   tableau$url = str_replace(tableau$url,"SRU","services/engine/search/sru")
