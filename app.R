@@ -167,6 +167,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         tableau[nrow(tableau)+1,] = NA
         date=y
         tableau[nrow(tableau),]<-c(date,a,b,mot,url)
+        progress$inc(1/((to-from+1)*length(I)*length(mots)), detail = paste("Gallicagram ratisse l'an", i))
+        
       }
       
     }
