@@ -36,6 +36,18 @@ Plot <- function(data,input){
   x <- list(title = data[["resolution"]],titlefont = 41)
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
+  
+  if(input$delta==TRUE){
+    mots<-str_split(input$mot,"&")
+    tableau$delta[tableau$mot==unlist(mots)[1]]<-tableau$ratio_temp[tableau$mot==unlist(mots)[1]]-tableau$ratio_temp[tableau$mot==unlist(mots)[2]]
+    tableau$hovers2 = str_c(tableau$date,": delta = ",round(tableau$delta*100,digits=2),"%, N = ",tableau$base_temp)
+    plot = plot_ly(tableau, x=~date[tableau$mot==unlist(mots)[1]],y=~delta[tableau$mot==unlist(mots)[1]],text=~hovers2[tableau$mot==unlist(mots)[1]],type='scatter',mode='spline',hoverinfo="text")
+    y <- list(title = "Différence de fréquence\nd'occurence dans le corpus",titlefont = 41,tickformat = ".1%")
+    x <- list(title = data[["resolution"]],titlefont = 41)
+    Title = paste("Freq(",unlist(mots)[1],") – Freq(",unlist(mots)[2],")")
+    Title=str_remove_all(Title," ")
+    plot = layout(plot, yaxis = y, xaxis = x,title = Title)
+  }
   if(input$barplot){
     width = nrow(tableau)
     span = 2/width + input$span*(width-2)/(10*width)
@@ -276,7 +288,8 @@ ui <- navbarPage("Gallicagram",
                                                              selectInput("resolution", label = "Résolution :", choices = c("Année"))),
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
-                                            checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE)
+                                            checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
+                                            checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE)
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
