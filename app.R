@@ -7,6 +7,7 @@ library(xml2)
 library(markdown)
 library(shinythemes)
 library(htmlwidgets)
+library(httr)
 data = list()
 
 js <- "
@@ -135,12 +136,12 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         if(doc_type == 3){
           url <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.relation%20any%20%22",ark1,"%22",ark3,")%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(text%20adj%20%22",mot1,"%22%20",or,")%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)sortby%20dc.date%20")
           }
-        ngram<-as.character(read_xml(url))
+        ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
         a<-str_extract(str_extract(ngram,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
         
         if(doc_type == 3){
           url_base <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.relation%20any%20%22",ark1,"%22",ark3,")%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date")
-          ngram_base<-as.character(read_xml(url_base))
+          ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
           b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
         }
         if(resolution=="Mois"& doc_type==1){
@@ -157,11 +158,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
       
       if(doc_type==2){
         url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=true&exactSearch=true&query=(dc.language%20all%20%22fre%22)%20and%20(text%20adj%20%22",mot1,"%22%20",or,")%20%20and%20(dc.type%20all%20%22monographie%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",y,"%22%20and%20gallicapublication_date%3C=%22",y,"%22)&suggest=10&keywords=",mot1,or_end)
-        ngram<-as.character(read_xml(url))
+        ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
         a<-str_extract(str_extract(ngram,"numberOfRecords>[:digit:]+"),"[:digit:]+")
-        # url_base<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=true&exactSearch=true&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",y,"%22%20and%20gallicapublication_date%3C=%22",y,"%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords=")
-        # ngram_base<-as.character(read_xml(url_base))
-        # b<-str_extract(str_extract(ngram_base,"numberOfRecords>[:digit:]+"),"[:digit:]+")
         b<-as.integer(base$base_temp[base$date==y])
         if(length(b)==0L){b=0}
         tableau[nrow(tableau)+1,] = NA
