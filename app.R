@@ -317,12 +317,17 @@ ui <- navbarPage("Gallicagram",
 server <- function(input, output,session){
   observeEvent(
     input$doc_type,
-    if(input$doc_type==3)
+    {if(input$doc_type==3)
       {
         liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         updateSelectizeInput(session,"titres",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r")
+        
+        titres<-reactive({liste_journaux$title[liste_journaux$ark==input$titres]})
+        output$legende1<-renderText(paste(titres()))
       }
-  )
+      
+      if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"}))}
+  })
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
@@ -347,11 +352,11 @@ server <- function(input, output,session){
       htmlwidgets::saveWidget(as_widget(Plot(data,input)), con)
     })
   
-  observeEvent(input$doc_type,
-               {
-                 titres<-reactive({input$titres})
-                 output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"} else{paste(titres(),"\n")}))
-               })
+  # observeEvent(input$doc_type,
+  #              {
+  #                titres<-reactive({input$titres})
+  #                output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"} else{paste(titres(),"\n")}))
+  #              })
 
   
   observeEvent(input$do,{
