@@ -409,10 +409,10 @@ x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
