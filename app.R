@@ -33,7 +33,7 @@ Plot <- function(data,input){
   tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
   #plot = onRender(plot,js)
-  y <- list(title = "Fréquence d'occurence dans\nle corpus",titlefont = 41,tickformat = ".1%")
+  y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".1%")
   x <- list(title = data[["resolution"]],titlefont = 41)
   plot = layout(plot, yaxis = y, xaxis = x,title = Title)
   if(length(grep(",",data$mot))==0){plot = layout(plot,showlegend=TRUE)}
@@ -44,7 +44,7 @@ Plot <- function(data,input){
     tableau$delta[tableau$mot==unlist(mots)[1]]<-loess((tableau$ratio_temp[tableau$mot==unlist(mots)[1]]-tableau$ratio_temp[tableau$mot==unlist(mots)[2]]~x),span=span)$fitted
     tableau$hovers2 = str_c(tableau$date,": delta = ",round(tableau$delta*100,digits=2),"%, N = ",tableau$base_temp)
     plot = plot_ly(filter(tableau,mot==unlist(mots)[[1]]), x=~date,y=~delta,text=~hovers2,type='scatter',mode='spline',hoverinfo="text")
-    y <- list(title = "Différence de fréquence\nd'occurence dans le corpus",titlefont = 41,tickformat = ".1%")
+    y <- list(title = "Différence de fréquence\nd'occurrence dans le corpus",titlefont = 41,tickformat = ".1%")
     x <- list(title = data[["resolution"]],titlefont = 41)
     Title = paste("Freq(",unlist(mots)[1],") – Freq(",unlist(mots)[2],")")
     Title=str_remove_all(Title," ")
