@@ -285,7 +285,8 @@ ui <- navbarPage("Gallicagram",
                                             actionButton("do","Générer le graphique"),
                                             checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
                                             checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
-                                            checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE)
+                                            checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE),
+                                            width = 5
                                           ),
                                           
                                           mainPanel(plotlyOutput("plot"),
@@ -405,10 +406,10 @@ x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
