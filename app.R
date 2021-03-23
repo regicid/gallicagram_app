@@ -276,8 +276,8 @@ ui <- navbarPage("Gallicagram",
                                             p('Utiliser "a+b" pour rechercher a OU b'),
                                             radioButtons("doc_type", "Corpus",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
                                             conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
-                                            div(style="display: inline-block;vertical-align:bottom",numericInput("beginning","Début",1914,width = "60%")),
-                                            div(style="display: inline-block;vertical-align:bottom",numericInput("end","Fin",1920,width = "60%")),
+                                            div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("beginning","Début",1914)),
+                                            div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("end","Fin",1920)),
                                             conditionalPanel(condition="input.doc_type != 2",
                                                               selectInput("resolution", label = "Résolution", choices = c("Année","Mois"))),
                                             conditionalPanel(condition="input.doc_type == 2",
@@ -405,10 +405,10 @@ x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
-# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-# colnames(a)=c("date","count")
-# compteur<-rbind(compteur,a)
-# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+colnames(a)=c("date","count")
+compteur<-rbind(compteur,a)
+write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
