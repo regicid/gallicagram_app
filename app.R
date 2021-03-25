@@ -304,6 +304,9 @@ ui <- navbarPage("Gallicagram",
                                                 ))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres")),
+                 tabPanel("Tutoriel",headerPanel("Tutoriel"),
+                          fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/WVXG-NwuQzY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                                      )),
                  tabPanel(title=HTML("<li><a href='http://gallicagram.hopto.org:3838/gallicapresse/' target='_blank'>Gallicapresse"))
 )
 
@@ -405,10 +408,10 @@ x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
