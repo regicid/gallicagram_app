@@ -305,7 +305,7 @@ ui <- navbarPage("Gallicagram",
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres")),
                  tabPanel("Tutoriel",headerPanel("Tutoriel"),
-                          fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/WVXG-NwuQzY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                          fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/SujS4t-ZGhQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
                                       )),
                  tabPanel(title=HTML("<li><a href='http://gallicagram.hopto.org:3838/gallicapresse/' target='_blank'>Gallicapresse"))
 )
