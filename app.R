@@ -8,6 +8,7 @@ library(markdown)
 library(shinythemes)
 library(htmlwidgets)
 library(httr)
+library(ngramr)
 data = list()
 
 js <- "
@@ -20,6 +21,9 @@ window.open(url);
 }"
 
 Plot <- function(data,input){
+  
+  if((input$search_mode==2 & input$doc_type==1)|input$search_mode!=2)
+  {
   tableau = data[["tableau"]]
   Title = paste("")
   width = length(unique(tableau$date))
@@ -30,7 +34,7 @@ Plot <- function(data,input){
     x = 1:length(z)
     tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
   }
-  tableau$hovers = str_c(tableau$date,": x = ",tableau$nb_temp,", N = ",tableau$base_temp)
+  tableau$hovers = str_c(tableau$date,": x/N = ",tableau$nb_temp,"/",tableau$base_temp,"\n                 = ",round(tableau$ratio_temp*100,digits = 1),"%")
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
   #plot = onRender(plot,js)
   y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".1%")
@@ -65,6 +69,31 @@ Plot <- function(data,input){
     plot=layout(plot)
     return(onRender(plot,js))
   }
+  }
+  if(input$search_mode==2 &input$doc_type==2)
+  {
+    mots = str_split(input$mot,"&")[[1]]
+    tableau=ngram(mots,corpus = "fre_2019",year_start = input$beginning,year_end = input$end,smoothing = 0 ,case_ins = TRUE,aggregate = TRUE)
+    colnames(tableau)=c("date","mot","ratio_temp","corpus")
+    Title = paste("")
+    width = length(unique(tableau$date))
+    span = 2/width + input$span*(width-2)/(10*width)
+    tableau$loess = NA
+    for(mot in mots){
+      mot<-str_c(mot," (All)")
+      z = which(tableau$mot==mot)
+      print(tableau$mot[1])
+      x = 1:length(z)
+      tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
+    }
+    tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio_temp*100,digits = 5),"%")
+    ngram=plot_ly(tableau,x=~date,y=~loess,color=~mot,text=~hovers,type='scatter',mode='spline',hoverinfo="text")
+    y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".5%")
+    x <- list(title = data[["resolution"]],titlefont = 41)
+    ngram = layout(ngram, yaxis = y, xaxis = x,title = Title,showlegend = TRUE)
+    return(ngram)
+  }
+  
 }
 
 get_data <- function(mot,from,to,resolution,doc_type,titres){
@@ -189,7 +218,7 @@ data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Ann�
 names(data)=c("tableau","mot","resolution")
 
 
-correlation_matrix <- function(df, 
+correlation_matrix <- function(df, input,
                                type = "pearson",
                                digits = 3, 
                                decimal.mark = ".",
@@ -197,8 +226,13 @@ correlation_matrix <- function(df,
                                show_significance = TRUE, 
                                replace_diagonal = TRUE, 
                                replacement = ""){
-  
- df=df[["tableau"]]
+  if(input$search_mode==2 &input$doc_type==2)
+  {
+    mots = str_split(input$mot,"&")[[1]]
+    df=ngram(mots,corpus = "fre_2019",year_start = input$beginning,year_end = input$end,smoothing = 0 ,case_ins = TRUE,aggregate = TRUE)
+    colnames(df)=c("date","mot","ratio_temp","corpus")
+  }else{
+ df=df[["tableau"]]}
  df=select(df,mot,ratio_temp)
  mots<-unlist(unique(df$mot))
  a<-df$ratio_temp[df$mot==mots[1]]
@@ -274,8 +308,9 @@ ui <- navbarPage("Gallicagram",
                                             textInput("mot","Terme(s) à chercher","Joffre&Pétain&Foch"),
                                             p('Séparer les termes par un "&" pour une recherche multiple'),
                                             p('Utiliser "a+b" pour rechercher a OU b'),
-                                            radioButtons("doc_type", "Corpus",choices = list("Presse" = 1, "Livres" = 2,"Recherche par titre de presse" = 3),selected = 1),
+                                            radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2),selected = 1),
                                             conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
+                                            conditionalPanel(condition="input.doc_type == 2",fluidRow(column(1,p("")),column(3,radioButtons("search_mode", "Etudier_avec",choices = list("Gallicagram" = 1,"Google_Ngram" = 2),selected = 1)))),
                                             div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("beginning","Début",1914)),
                                             div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("end","Fin",1920)),
                                             conditionalPanel(condition="input.doc_type != 2",
@@ -290,10 +325,10 @@ ui <- navbarPage("Gallicagram",
                                           
                                           mainPanel(plotlyOutput("plot"),
                                                     fluidRow(textOutput("legende"),align="right"),
-                                                    fluidRow(textOutput("legende0"),align="right"),
+                                                    conditionalPanel(condition="(input.doc_type == 2 && input.search_mode==1) || input.doc_type != 2",fluidRow(textOutput("legende0"),align="right")),
                                                     fluidRow(textOutput("legende1"),align="right"),
-                                                    fluidRow(textOutput("legende2"),align="right"),
-                                                    fluidRow(textOutput("legende3"),align="right"),
+                                                    conditionalPanel(condition="(input.doc_type == 2 && input.search_mode==1) || input.doc_type != 2",fluidRow(textOutput("legende2"),align="right")),
+                                                    conditionalPanel(condition="(input.doc_type == 2 && input.search_mode==1) || input.doc_type != 2",fluidRow(textOutput("legende3"),align="right")),
                                                     conditionalPanel(condition="input.correlation_test",p("")),
                                                     conditionalPanel(condition="input.correlation_test",fluidRow(tableOutput("corr"),align="right")),
                                                     conditionalPanel(condition="input.correlation_test",fluidRow(textOutput("pvalue"),align="right")),
@@ -330,9 +365,13 @@ server <- function(input, output,session){
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
-  output$corr<-renderTable(correlation_matrix(data),rownames = TRUE)
+  output$corr<-renderTable(correlation_matrix(data,input),rownames = TRUE)
   output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
-  output$legende=renderText("Source : gallica.bnf.fr")
+  observeEvent(input$search_mode,{observeEvent(input$doc_type,{
+    if(input$search_mode==2 & input$doc_type==2)
+    {output$legende=renderText("Source : books.google.com/ngrams")}
+      else{output$legende=renderText("Source : gallica.bnf.fr")}
+        })})
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," numéros épluchés\n"))
   output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
@@ -367,7 +406,7 @@ server <- function(input, output,session){
     
     output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base_temp))," numéros épluchés\n"))
     output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$nb_temp))," résultats trouvés"))
-    output$corr<-renderTable(correlation_matrix(df),rownames = TRUE)
+    output$corr<-renderTable(correlation_matrix(df,input),rownames = TRUE)
     
     output$downloadData <- downloadHandler(
       filename = function() {
@@ -408,10 +447,10 @@ x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
 plot2}
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
