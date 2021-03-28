@@ -373,7 +373,7 @@ server <- function(input, output,session){
       else{output$legende=renderText("Source : gallica.bnf.fr")}
         })})
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
-  output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," numéros épluchés\n"))
+  output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," documents épluchés\n"))
   output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
   output$downloadData <- downloadHandler(
     filename = function() {
