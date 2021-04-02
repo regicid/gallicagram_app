@@ -75,14 +75,16 @@ Plot <- function(data,input){
     mots = str_split(input$mot,"&")[[1]]
     tableau=ngram(mots,corpus = "fre_2019",year_start = input$beginning,year_end = input$end,smoothing = 0 ,case_ins = TRUE,aggregate = TRUE)
     colnames(tableau)=c("date","mot","ratio_temp","corpus")
+    tableau$mot<-str_remove_all(tableau$mot," \\(All\\)")
+    tableau$mot<-str_remove_all(tableau$mot,"\\(")
+    tableau$mot<-str_remove_all(tableau$mot,"\\)")
+    tableau$mot<-str_replace_all(tableau$mot," \\+ ","\\+")
     Title = paste("")
     width = length(unique(tableau$date))
     span = 2/width + input$span*(width-2)/(10*width)
     tableau$loess = NA
     for(mot in mots){
-      mot<-str_c(mot," (All)")
       z = which(tableau$mot==mot)
-      print(tableau$mot[1])
       x = 1:length(z)
       tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
     }
@@ -231,6 +233,10 @@ correlation_matrix <- function(df, input,
     mots = str_split(input$mot,"&")[[1]]
     df=ngram(mots,corpus = "fre_2019",year_start = input$beginning,year_end = input$end,smoothing = 0 ,case_ins = TRUE,aggregate = TRUE)
     colnames(df)=c("date","mot","ratio_temp","corpus")
+    df$mot<-str_replace_all(df$mot," \\(All\\)","")
+    df$mot<-str_remove_all(df$mot,"\\(")
+    df$mot<-str_remove_all(df$mot,"\\)")
+    df$mot<-str_replace_all(df$mot," \\+ ","\\+")
   }else{
  df=df[["tableau"]]}
  df=select(df,mot,ratio_temp)

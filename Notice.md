@@ -16,10 +16,12 @@
 - L'utilisateur peut chercher un syntagme unique (ex. Clemenceau).
 - Il peut aussi comparer les évolutions respectives de deux syntagmes concurrents en les séparant par une esperluette "&" (ex. Georges Clemenceau&Aristide Briand).
 - Il peut enfin effectuer une recherche conditionnelle de forme OU en utilisant le signe "+" (ex. juif+juive). Il s'agit d'un "ou" inclusif qui renverra tous les numéros contenant les termes séparés par un "+". La recherche exacte de Gallica dénombre des syntagmes exacts et isolés. Ainsi, entrer le mot "juif" ne permettra pas d'obtenir les résultats correspondant à son pluriel : "juifs". La recherche conditionnelle OU avec "+" permet d'intégrer ces résultats.
-- Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&calviniste+huguenot+parpaillot)
+- Ces deux options de recherche sont cumulables (ex. juif+juive+judéo&calviniste+huguenot+parpaillot).
+- La recherche n'est pas sensible à la casse (case insensitive).
 - L'utilisateur peut choisir parmi deux corpus de recherche : la presse de Gallica (journaux et revues) et les livres de Gallica (monographies).
 - Le corpus de presse peut être analysé à l'échelle mensuelle ou à l'échelle annuelle/le corpus de livres ne peut être analysé qu'à l'échelle annuelle.
 - L'utilisateur peut effectuer sa recherche dans un nombre restreint de titres de presse, maîtrisant ainsi lui-même le corpus (Recherche par titre de presse). Il peut sélectionner un ou plusieurs titres. La liste des titres est triée dans l'ordre décroissant des numéros de presse disponibles dans Gallica.
+- Une fonction permet d'afficher, dans la fenêtre de visualisation, le résultat de la recherche avec Google Ngram Viewer afin de le comparer à celui de Gallicagram_livres. Il faut noter que le mode de calcul est très différent (n-gramme avec Ngram Viewer vs. nombre de livres présentant le syntagme recherché avec Gallicagram), mais les évolutions et les tendances peuvent être similaires. Ngram Viewer restreint son analyse au corpus de livres de Google Books.
 
 ## Traitements
 
