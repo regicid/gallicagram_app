@@ -359,7 +359,7 @@ server <- function(input, output,session){
   output$legende1<-renderText(str_c("Corpus : presse\n"))
   observeEvent(
     input$doc_type,
-    {if(input$doc_type==3)
+    {if(input$doc_type==3 && is.null(input$titres))
       {
         liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         updateSelectizeInput(session,"titres",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r")
