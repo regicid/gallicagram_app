@@ -224,7 +224,7 @@ correlation_matrix <- function(df, input,
                                type = "pearson",
                                digits = 3, 
                                decimal.mark = ".",
-                               use = "all", 
+                               use = "upper", 
                                show_significance = TRUE, 
                                replace_diagonal = TRUE, 
                                replacement = ""){
@@ -301,7 +301,8 @@ correlation_matrix <- function(df, input,
   } else if (replace_diagonal) {
     diag(Rnew) <- replacement
   }
-  
+  Rnew<-Rnew[-length(mots),]
+  Rnew<-Rnew[,-1]
   return(Rnew)
 }
 
