@@ -356,19 +356,27 @@ ui <- navbarPage("Gallicagram",
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session){
+  output$legende1<-renderText(str_c("Corpus : presse\n"))
   observeEvent(
     input$doc_type,
     {if(input$doc_type==3)
       {
         liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         updateSelectizeInput(session,"titres",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r")
-        
-        titres<-reactive({liste_journaux$title[liste_journaux$ark==input$titres]})
-        output$legende1<-renderText(paste(titres()))
       }
       
-      if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"}))}
   })
+  observeEvent(
+    input$do,
+    {if(input$doc_type==3)
+    {
+      liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
+      titres<-reactive({liste_journaux$title[liste_journaux$ark==input$titres]})
+      output$legende1<-renderText(paste(titres()))
+    }
+      
+      if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"}))}
+    })
   output$corpus_presse = renderPlotly(Barplot1())
   output$corpus_livres = renderPlotly(Barplot2())
   output$plot <- renderPlotly({Plot(data,input)})
