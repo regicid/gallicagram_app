@@ -3,7 +3,7 @@ library(stringr)
 library(xml2)
 
 mot="cochon"
-from="1332"
+from="1380"
 to="2021"
 resolution="Année"
 doc_type=2
@@ -89,4 +89,4 @@ tableau<-tableau[,-2]
 tableau<-tableau[,-3]
 tableau<-tableau[,-3]  
 
-write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_livres_annees.csv')  
+write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_livres_annees.csv',fileEncoding = "UTF-8",row.names = FALSE)  

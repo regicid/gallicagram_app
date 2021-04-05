@@ -89,5 +89,5 @@ doc_type=1
   tableau<-tableau[,-3]
   tableau<-tableau[,-3]  
 
-  write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_annees.csv')  
+  write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_annees.csv',fileEncoding = "UTF-8",row.names = FALSE)  
   

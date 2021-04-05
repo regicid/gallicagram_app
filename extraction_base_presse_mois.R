@@ -89,4 +89,4 @@ tableau<-tableau[,-2]
 tableau<-tableau[,-3]
 tableau<-tableau[,-3]  
 
-write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_mois.csv')  
+write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_mois.csv',fileEncoding = "UTF-8",row.names = FALSE)  
