@@ -443,7 +443,7 @@ server <- function(input, output,session){
     invalidateLater(1000, session)
     paste("The current time is", Sys.time())
   })
-  
+  shinyOptions(progress.style="old")
 }
 Barplot1 <- function(){table<-read.csv("base_presse_annees.csv",encoding="UTF-8")
 somme<-sum(table$base_temp)
