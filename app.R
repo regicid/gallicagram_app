@@ -346,7 +346,32 @@ ui <- navbarPage("Gallicagram",
                                                     h2(textOutput("currentTime"), style="color:white")
                                                 ))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
-                 tabPanel("Corpus",plotlyOutput("corpus_presse"),plotlyOutput("corpus_livres")),
+                 tabPanel("Corpus de presse",fluidPage(),
+                          tags$head(
+                            tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
+                          pageWithSidebar(headerPanel(''),
+                                          sidebarPanel(checkboxInput("corpus_relative_p", "Afficher les résultats en valeurs relatives", value = FALSE),
+                                                       radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6,"Titre de presse" = 7),selected = 1),
+                                          ),
+                                          mainPanel(
+                                            fluidRow(plotlyOutput("corpus1")),
+                                            p("")
+                                          )
+                          )
+                 ),
+                 tabPanel("Corpus de livres",fluidPage(),
+                          tags$head(
+                            tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
+                          pageWithSidebar(headerPanel(''),
+                                          sidebarPanel(checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE),
+                                                       radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6),selected = 1),
+                                          ),
+                                          mainPanel(
+                                            fluidRow(plotlyOutput("corpus2")),
+                                            p("")
+                                          )
+                          )
+                 ),
                  tabPanel("Tutoriel",headerPanel("Tutoriel"),
                           fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/SujS4t-ZGhQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'))),
                  tabPanel(title=HTML("<li><a href='http://gallicagram.hopto.org:3838/gallicapresse/' target='_blank'>Gallicapresse"))
@@ -443,6 +468,159 @@ server <- function(input, output,session){
     invalidateLater(1000, session)
     paste("The current time is", Sys.time())
   })
+  
+  corpus_display_p<-function() {
+    
+    if(input$corpus_relative_p==FALSE){
+      if(input$corpus_structure_p==1){
+        plot<-Barplot1()
+        return(plot)
+      }
+      else if(input$corpus_structure_p==7){
+        p_titres<-read.csv("p_titres.csv",encoding = "UTF-8")
+        plot3<-plot_ly(p_titres,x=~as.integer(p_titres$date),y=~n,color=~principaux_titres,type='bar',colors="Dark2")
+        plot3<-layout(plot3, title="Distribution des numéros de presse en français \nselon le journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot3)
+      }
+      else if(input$corpus_structure_p==2){
+        p_villes<-read.csv("p_villes.csv",encoding = "UTF-8")
+        plot7<-plot_ly(p_villes,x=~as.integer(p_villes$date),y=~n,color=~principales_villes,type='bar',colors="Dark2")
+        plot7<-layout(plot7, title="Distribution des numéros de presse en français \nselon la ville d'édition", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot7)
+      }
+      else if(input$corpus_structure_p==5){
+        p_themes<-read.csv("p_themes.csv",encoding = "UTF-8")
+        plot11<-plot_ly(p_themes,x=~as.integer(p_themes$date),y=~n,color=~principaux_themes,type='bar',colors="Dark2")
+        plot11<-layout(plot11, title="Distribution des numéros de presse en français \nselon le thème du journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot11)
+      }
+      else if(input$corpus_structure_p==6){
+        periodicite<-read.csv("periodicite.csv",encoding = "UTF-8")
+        plot16<-plot_ly(periodicite,x=~as.integer(periodicite$date),y=~n,color=~is_quotidien,type='bar',colors="Dark2")
+        plot16<-layout(plot16, title="Distribution des numéros de presse en français \nselon la périodicité du journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot16)
+      }
+      else if(input$corpus_structure_p==3){
+        p_droits<-read.csv("p_droits.csv",encoding = "UTF-8")
+        plot5<-plot_ly(p_droits,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
+        plot5<-layout(plot5, title="Distribution des numéros de presse en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot5)
+      }
+      else if(input$corpus_structure_p==4){
+        p_sources<-read.csv("p_sources.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_sources,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
+        plot4<-layout(plot4, title="Distribution des numéros de presse en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot4)
+      }
+    }
+    else if(input$corpus_relative_p==TRUE){
+      if(input$corpus_structure_p==7){
+        p_titres<-read.csv("p_titres.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_titres,x=~as.integer(p_titres$date),y=~n,color=~principaux_titres,type='bar',colors="Dark2")
+        plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),title="Distribution des numéros de presse en français \nselon le journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot4)
+      }
+      else if(input$corpus_structure_p==2){
+        p_villes<-read.csv("p_villes.csv",encoding = "UTF-8")
+        plot8<-plot_ly(p_villes,x=~as.integer(p_villes$date),y=~n,color=~principales_villes,type='bar',colors="Dark2")
+        plot8<-layout(plot8, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon la ville d'édition", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot8)
+      }
+      else if(input$corpus_structure_p==5){
+        p_themes<-read.csv("p_themes.csv",encoding = "UTF-8")
+        plot12<-plot_ly(p_themes,x=~as.integer(p_themes$date),y=~n,color=~principaux_themes,type='bar',colors="Dark2")
+        plot12<-layout(plot12, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon le thème du journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot12)
+      }
+      else if(input$corpus_structure_p==6){
+        periodicite<-read.csv("periodicite.csv",encoding = "UTF-8")
+        plot17<-plot_ly(periodicite,x=~as.integer(periodicite$date),y=~n,color=~is_quotidien,type='bar',colors="Dark2")
+        plot17<-layout(plot17, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon la périodicité du journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
+        return(plot17)
+      }
+      else if(input$corpus_structure_p==3){
+        p_droits<-read.csv("p_droits.csv",encoding = "UTF-8")
+        plot5<-plot_ly(p_droits,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
+        plot5<-layout(plot5, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
+        return(plot5)
+      }
+      else if(input$corpus_structure_p==4){
+        p_sources<-read.csv("p_sources.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_sources,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
+        plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
+        return(plot4)
+      }
+    }
+    
+  }
+  observeEvent(input$corpus_structure_p,{observeEvent(input$corpus_relative_p,{
+    output$corpus1<-renderPlotly({corpus_display_p()})
+  })})
+  
+  corpus_display_l<-function() {
+    
+    if(input$corpus_relative_l==FALSE){
+      if(input$corpus_structure_p==1){
+        plot<-Barplot2()
+        return(plot)
+      }
+      else if(input$corpus_structure_l==2){
+        p_villes_livres<-read.csv("p_villes_livres.csv",encoding = "UTF-8")
+        plot3<-plot_ly(p_villes_livres,x=~date,y=~n,color=~principales_villes,type='bar',colors="Dark2")
+        plot3<-layout(plot3, title="Distribution des livres en français \nselon leur ville de publication", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot3)
+      }
+      else if(input$corpus_structure_l==3){
+        p_droits_livres<-read.csv("p_droits_livres.csv",encoding = "UTF-8")
+        plot5<-plot_ly(p_droits_livres,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
+        plot5<-layout(plot5, title="Distribution des livres en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot5)
+      }
+      else if(input$corpus_structure_l==4){
+        p_sources_livres<-read.csv("p_sources_livres.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_sources_livres,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
+        plot4<-layout(plot4, title="Distribution des livres en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot4)
+      }
+      else if(input$corpus_structure_l==5){
+        p_pages_livres<-read.csv("p_pages_livres.csv",encoding = "UTF-8")
+        plot7<-plot_ly(p_pages_livres,x=~date,y=~Mean,type='bar',colors="Dark2")
+        plot7<-layout(plot7, title="Distribution des livres en français \nselon leur volume (nombre de pages moyen)", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de pages"),barmode="stack",bargap=0)
+        return(plot7)
+      }
+      else if(input$corpus_structure_l==6){
+        p_pages_livres<-read.csv("p_pages_livres.csv",encoding = "UTF-8")
+        plot6<-plot_ly(p_pages_livres,x=~date,y=~Median,type='bar',colors="Dark2")
+        plot6<-layout(plot6, title="Distribution des livres en français \nselon leur volume (nombre de pages médian)", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de pages"),barmode="stack",bargap=0)
+        return(plot6)
+      }
+    }
+    else if(input$corpus_relative_l==TRUE){
+      if(input$corpus_structure_l==2){
+        p_villes_livres<-read.csv("p_villes_livres.csv",encoding = "UTF-8")
+        plot3<-plot_ly(p_villes_livres,x=~date,y=~n,color=~principales_villes,type='bar',colors="Dark2")
+        plot3<-layout(plot3, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur ville de publication", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot3)
+      }
+      else if(input$corpus_structure_l==3){
+        p_droits_livres<-read.csv("p_droits_livres.csv",encoding = "UTF-8")
+        plot5<-plot_ly(p_droits_livres,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
+        plot5<-layout(plot5, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot5)
+      }
+      else if(input$corpus_structure_l==4){
+        p_sources_livres<-read.csv("p_sources_livres.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_sources_livres,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
+        plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+        return(plot4)
+      }
+    }
+    
+  }
+  observeEvent(input$corpus_structure_l,{observeEvent(input$corpus_relative_l,{
+    output$corpus2<-renderPlotly({corpus_display_l()})
+  })})
+  
   shinyOptions(progress.style="old")
 }
 Barplot1 <- function(){table<-read.csv("base_presse_annees.csv",encoding="UTF-8")
@@ -453,7 +631,7 @@ Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?oper
 y <- list(title = "Nombre de numéros dans Gallica-presse",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
-plot2}
+return(plot2)}
 
 Barplot2 <- function(){table<-read.csv("base_livres_annees.csv",encoding="UTF-8")
 somme<-sum(table$base_temp)
@@ -464,7 +642,7 @@ Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?oper
 y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
 x <- list(title = "Date",titlefont = 41)
 plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
-plot2}
+return(plot2)}
 
 compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
 a<-as.data.frame(cbind(as.character(Sys.Date()),1))
