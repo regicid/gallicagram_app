@@ -508,6 +508,9 @@ server <- function(input, output,session){
       }
       else if(input$corpus_structure_p==4){
         p_sources<-read.csv("p_sources.csv",encoding = "UTF-8")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[/].+")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[-].+")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[()].+")
         plot4<-plot_ly(p_sources,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
         plot4<-layout(plot4, title="Distribution des numéros de presse en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
         return(plot4)
@@ -546,6 +549,9 @@ server <- function(input, output,session){
       }
       else if(input$corpus_structure_p==4){
         p_sources<-read.csv("p_sources.csv",encoding = "UTF-8")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[/].+")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[-].+")
+        p_sources$principales_sources<-str_remove_all(p_sources$principales_sources,"[()].+")
         plot4<-plot_ly(p_sources,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
         plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
         return(plot4)
@@ -578,6 +584,9 @@ server <- function(input, output,session){
       }
       else if(input$corpus_structure_l==4){
         p_sources_livres<-read.csv("p_sources_livres.csv",encoding = "UTF-8")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[/].+")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[-].+")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[()].+")
         plot4<-plot_ly(p_sources_livres,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
         plot4<-layout(plot4, title="Distribution des livres en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
         return(plot4)
@@ -610,6 +619,9 @@ server <- function(input, output,session){
       }
       else if(input$corpus_structure_l==4){
         p_sources_livres<-read.csv("p_sources_livres.csv",encoding = "UTF-8")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[/].+")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[-].+")
+        p_sources_livres$principales_sources<-str_remove_all(p_sources_livres$principales_sources,"[()].+")
         plot4<-plot_ly(p_sources_livres,x=~date,y=~n,color=~principales_sources,type='bar',colors="Dark2")
         plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
         return(plot4)
