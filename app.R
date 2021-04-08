@@ -109,10 +109,13 @@ get_data_bis <- function(mot,from,to,resolution,tot_df){
     tot_df$date<-str_remove_all(tot_df$date,"-.+")
   }
   if (resolution=="Mois"){
+  from=str_c(from,"-01")
+  to=str_c(to,"-12")
   tot_df$date<-str_extract(tot_df$date,".......")
   }
   tot_df<-tot_df[is.na(tot_df$date)==FALSE,]
   tot_df$date<-as.character(tot_df$date)
+  tot_df<-tot_df[tot_df$date>=from & tot_df$date<=to,]
   tableau<-tot_df%>%count(date)
   tot_df$ark=str_extract_all(tot_df$identifier,"12148/.+")
   tot_df$ark=str_remove_all(tot_df$ark,"12148/")
@@ -759,10 +762,10 @@ server <- function(input, output,session){
 }
 
 
-# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-# colnames(a)=c("date","count")
-# compteur<-rbind(compteur,a)
-# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+colnames(a)=c("date","count")
+compteur<-rbind(compteur,a)
+write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
