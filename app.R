@@ -9,6 +9,7 @@ library(shinythemes)
 library(htmlwidgets)
 library(httr)
 library(ngramr)
+library(dplyr)
 data = list()
 
 js <- "
@@ -96,6 +97,57 @@ Plot <- function(data,input){
     return(ngram)
   }
   
+}
+get_data_bis <- function(mot,from,to,resolution,tot_df){
+  mot=str_remove(mot,"&.+")
+  mot=str_remove(mot,"[+].+")
+  mot=str_replace_all(mot,"[:punct:]"," ")
+  mot_init<-mot
+  mot=str_replace_all(mot,"[:space:]","%20")
+  
+  if(resolution=="Année"){
+    tot_df$date<-str_remove_all(tot_df$date,"-.+")
+  }
+  if (resolution=="Mois"){
+  tot_df$date<-str_extract(tot_df$date,".......")
+  }
+  tot_df<-tot_df[is.na(tot_df$date)==FALSE,]
+  tot_df$date<-as.character(tot_df$date)
+  tableau<-tot_df%>%count(date)
+  tot_df$ark=str_extract_all(tot_df$identifier,"12148/.+")
+  tot_df$ark=str_remove_all(tot_df$ark,"12148/")
+  tot_df$resultats<-0
+  
+  progress <- shiny::Progress$new()
+  on.exit(progress$close())
+  progress$set(message = "Patience...", value = 0)
+  
+  tot_df$detect<-FALSE
+  for (i in 1:length(tot_df$ark)) {
+  url<-str_c("https://gallica.bnf.fr/services/ContentSearch?ark=",tot_df$ark[i],"&query=",mot)
+  resultat<-as.character(read_html(RETRY("GET",url,times = 3)))
+  resultat=str_remove_all(resultat,"[:space:]")
+  resultat=str_remove_all(resultat,".+countresults")
+  resultat=str_remove_all(resultat,"searchtime.+")
+  resultat=str_extract(resultat,"[:digit:]+")
+  tot_df$resultats[i]<-as.integer(resultat)
+  if(as.integer(resultat)>0){tot_df$detect[i]<-TRUE}
+  progress$inc(1/length(tot_df$ark), detail = paste(as.integer(i*100/length(tot_df$ark)),"% traités"))
+  }
+  tableau$count<-0
+  tableau$detect<-0
+  for (j in 1:length(tableau$date)) {
+    tableau$count[j]<-sum(tot_df$resultats[tot_df$date==tableau$date[j]])
+    tableau$detect[j]<-sum(tot_df$detect[tot_df$date==tableau$date[j]])
+  }
+  tableau$mot<-mot_init
+  tableau$url<-"https://gallica.bnf.fr/"
+  colnames(tableau)<-c("date","base_temp","count","nb_temp","mot","url")
+  tableau$ratio_temp<-tableau$nb_temp/tableau$base_temp
+  tableau$ratio_temp[is.na(tableau$ratio_temp)]<-0
+  data = list(tableau,paste(mot),resolution)
+  names(data) = c("tableau","mot","resolution")
+  return(data)
 }
 
 get_data <- function(mot,from,to,resolution,doc_type,titres){
@@ -305,6 +357,7 @@ correlation_matrix <- function(df, input,
   Rnew<-Rnew[,-1]
   return(Rnew)
 }
+options(shiny.maxRequestSize = 100*1024^2)
 
 ui <- navbarPage("Gallicagram",
                  tabPanel("Graphique",fluidPage(),
@@ -313,11 +366,18 @@ ui <- navbarPage("Gallicagram",
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
                                             textInput("mot","Terme(s) à chercher","Joffre&Pétain&Foch"),
-                                            p('Séparer les termes par un "&" pour une recherche multiple'),
-                                            p('Utiliser "a+b" pour rechercher a OU b'),
-                                            radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2),selected = 1),
+                                            conditionalPanel(condition="input.doc_type != 4",p('Séparer les termes par un "&" pour une recherche multiple')),
+                                            conditionalPanel(condition="input.doc_type != 4",p('Utiliser "a+b" pour rechercher a OU b')),
+                                            conditionalPanel(condition="input.doc_type == 4",p('Recherche limitée à un seul syntagme')),
+                                            radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2, "Corpus personnalisé"=4),selected = 1),
                                             conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
                                             conditionalPanel(condition="input.doc_type == 2",fluidRow(column(1,p("")),column(3,radioButtons("search_mode", "Etudier_avec",choices = list("Gallicagram" = 1,"Google_Ngram" = 2),selected = 1)))),
+                                            conditionalPanel(condition="input.doc_type == 4",fileInput('target_upload','', 
+                                                      accept = c(
+                                                        'text/csv',
+                                                        'text/comma-separated-values',
+                                                        '.csv'
+                                                      ),buttonLabel='Importer', placeholder='un rapport de recherche')),
                                             div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("beginning","Début",1914)),
                                             div(style="display: inline-block;vertical-align:bottom;width: 45%;",numericInput("end","Fin",1920)),
                                             conditionalPanel(condition="input.doc_type != 2",
@@ -364,7 +424,7 @@ ui <- navbarPage("Gallicagram",
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE),
-                                                       radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6),selected = 1),
+                                                       radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7),selected = 1),
                                           ),
                                           mainPanel(
                                             fluidRow(plotlyOutput("corpus2")),
@@ -402,8 +462,7 @@ server <- function(input, output,session){
       
       if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"}))}
     })
-  output$corpus_presse = renderPlotly(Barplot1())
-  output$corpus_livres = renderPlotly(Barplot2())
+
   output$plot <- renderPlotly({Plot(data,input)})
   output$corr<-renderTable(correlation_matrix(data,input),rownames = TRUE)
   output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
@@ -434,7 +493,21 @@ server <- function(input, output,session){
   observeEvent(input$do,{
     datasetInput <- reactive({
       data$tableau})
-    df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)
+    if (input$doc_type!=4){
+    df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)}
+    else if(input$doc_type==4){
+      inFile<-input$target_upload
+      tot_df<- read.csv(inFile$datapath, header = TRUE,sep = ";",encoding = "UTF-8")
+      colnames(tot_df)<-str_remove_all(colnames(tot_df),"'")
+      colnames(tot_df)<-str_remove_all(colnames(tot_df),"\\.")
+      colnames(tot_df)<-str_remove_all(colnames(tot_df)," ")
+      colnames(tot_df)<-str_remove_all(colnames(tot_df),"XUFEFF")
+      colnames(tot_df)<-iconv(colnames(tot_df),from="UTF-8",to="ASCII//TRANSLIT")
+      tot_df<-select(tot_df,URLdaccesaudocument,Typededocument,Titre,Auteurs,Contributeur,Editeurs,Datededition,Description,NombredeVues,Provenance,Droits,ArkCatalogue)
+      colnames(tot_df)<-c("identifier","type","title","creator","contributor","publisher","date","description","format","source","rights","relation")
+      tot_df$identifier<-str_remove_all(tot_df$identifier," .+")
+      df=get_data_bis(input$mot,input$beginning,input$end,input$resolution,tot_df)
+      }
     
     output$plot <- renderPlotly({Plot(df,input)})
     
@@ -612,6 +685,26 @@ server <- function(input, output,session){
         plot6<-layout(plot6, title="Distribution des livres en français \nselon leur volume (nombre de pages médian)", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de pages"),barmode="stack",bargap=0)
         return(plot6)
       }
+      else if(input$corpus_structure_l==7){
+        tableau<-read.csv("base_livres_annees_bnf.csv",encoding = "UTF-8")
+        tableau1<-read.csv("base_livres_annees.csv",encoding = "UTF-8")
+        for (i in 1:1379) {
+          a<-as.data.frame(cbind(i,0))
+          colnames(a)<-c("date","base_temp")
+          tableau1<-bind_rows(tableau1,a)
+          tableau1<-tableau1[order(tableau1$date),]
+          rownames(tableau1)<-NULL
+        }
+        tableau$base_temp<-tableau$base_temp-tableau1$base_temp
+        tableau$corpus<-"Non numérisé"
+        tableau1$corpus<-"Numérisé"
+        tableau2<-bind_rows(tableau,tableau1)
+
+        plot18<-plot_ly(tableau2,x=~as.integer(tableau2$date),y=~base_temp,color=~corpus,type='bar',colors="Dark2")
+        plot18<-layout(plot18, title="Distribution des livres en français \nselon leur état de numérisation", xaxis=list(title="Date",tickangle="-45",range=c("1380","2021")),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+
+        return(plot18)
+      }
     }
     else if(input$corpus_relative_l==TRUE){
       if(input$corpus_structure_l==2){
@@ -635,8 +728,28 @@ server <- function(input, output,session){
         plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur bibliothèque de numérisation d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
         return(plot4)
       }
+      else if(input$corpus_structure_l==7){
+        tableau<-read.csv("base_livres_annees_bnf.csv",encoding = "UTF-8")
+        tableau1<-read.csv("base_livres_annees.csv",encoding = "UTF-8")
+        for (i in 1:1379) {
+          a<-as.data.frame(cbind(i,0))
+          colnames(a)<-c("date","base_temp")
+          tableau1<-bind_rows(tableau1,a)
+          tableau1<-tableau1[order(tableau1$date),]
+          rownames(tableau1)<-NULL
+        }
+        tableau$base_temp<-tableau$base_temp-tableau1$base_temp
+        tableau$corpus<-"Non numérisé"
+        tableau1$corpus<-"Numérisé"
+        tableau2<-bind_rows(tableau,tableau1)
+
+        plot19<-plot_ly(tableau2,x=~as.integer(tableau2$date),y=~base_temp,color=~corpus,type='bar',colors="Dark2")
+        plot19<-layout(plot19, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),title="Distribution des livres en français \nselon leur état de numérisation", xaxis=list(title="Date",tickangle="-45",range=c("1380","2021")),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
+
+        return(plot19)
     }
     
+    }
   }
   observeEvent(input$corpus_structure_l,{observeEvent(input$corpus_relative_l,{
     output$corpus2<-renderPlotly({corpus_display_l()})
@@ -646,10 +759,10 @@ server <- function(input, output,session){
 }
 
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
