@@ -710,17 +710,23 @@ server <- function(input, output,session){
       else if(input$corpus_structure_l==7){
         tableau<-read.csv("base_livres_annees_bnf.csv",encoding = "UTF-8")
         tableau1<-read.csv("base_livres_annees.csv",encoding = "UTF-8")
+        tableau3<-read.csv("base_livres_annees_numerises.csv",encoding = "UTF-8")
         for (i in 1:1379) {
           a<-as.data.frame(cbind(i,0))
           colnames(a)<-c("date","base_temp")
           tableau1<-bind_rows(tableau1,a)
           tableau1<-tableau1[order(tableau1$date),]
           rownames(tableau1)<-NULL
+          tableau3<-bind_rows(tableau3,a)
+          tableau3<-tableau3[order(tableau3$date),]
+          rownames(tableau3)<-NULL
         }
-        tableau$base_temp<-tableau$base_temp-tableau1$base_temp
+        tableau3$base_temp<-tableau3$base_temp-tableau1$base_temp
+        tableau$base_temp<-tableau$base_temp-tableau1$base_temp-tableau3$base_temp
         tableau$corpus<-"Non numérisé"
-        tableau1$corpus<-"Numérisé"
-        tableau2<-bind_rows(tableau,tableau1)
+        tableau1$corpus<-"Numérisé et océrisé"
+        tableau3$corpus<-"Numérisé mais pas océrisé"
+        tableau2<-bind_rows(tableau,tableau1,tableau3)
 
         plot18<-plot_ly(tableau2,x=~as.integer(tableau2$date),y=~base_temp,color=~corpus,type='bar',colors="Dark2")
         plot18<-layout(plot18, title="Distribution des livres en français \nselon leur état de numérisation", xaxis=list(title="Date",tickangle="-45",range=c("1380","2021")),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
@@ -753,17 +759,23 @@ server <- function(input, output,session){
       else if(input$corpus_structure_l==7){
         tableau<-read.csv("base_livres_annees_bnf.csv",encoding = "UTF-8")
         tableau1<-read.csv("base_livres_annees.csv",encoding = "UTF-8")
+        tableau3<-read.csv("base_livres_annees_numerises.csv",encoding = "UTF-8")
         for (i in 1:1379) {
           a<-as.data.frame(cbind(i,0))
           colnames(a)<-c("date","base_temp")
           tableau1<-bind_rows(tableau1,a)
           tableau1<-tableau1[order(tableau1$date),]
           rownames(tableau1)<-NULL
+          tableau3<-bind_rows(tableau3,a)
+          tableau3<-tableau3[order(tableau3$date),]
+          rownames(tableau3)<-NULL
         }
-        tableau$base_temp<-tableau$base_temp-tableau1$base_temp
+        tableau3$base_temp<-tableau3$base_temp-tableau1$base_temp
+        tableau$base_temp<-tableau$base_temp-tableau1$base_temp-tableau3$base_temp
         tableau$corpus<-"Non numérisé"
-        tableau1$corpus<-"Numérisé"
-        tableau2<-bind_rows(tableau,tableau1)
+        tableau1$corpus<-"Numérisé et océrisé"
+        tableau3$corpus<-"Numérisé mais pas océrisé"
+        tableau2<-bind_rows(tableau,tableau1,tableau3)
 
         plot19<-plot_ly(tableau2,x=~as.integer(tableau2$date),y=~base_temp,color=~corpus,type='bar',colors="Dark2")
         plot19<-layout(plot19, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),title="Distribution des livres en français \nselon leur état de numérisation", xaxis=list(title="Date",tickangle="-45",range=c("1380","2021")),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
