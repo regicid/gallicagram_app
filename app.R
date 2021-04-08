@@ -26,6 +26,9 @@ Plot <- function(data,input){
   if((input$search_mode==2 & input$doc_type==1)|input$search_mode!=2)
   {
   tableau = data[["tableau"]]
+  if(input$doc_type==4 & input$occurrences_page==TRUE){
+    tableau$ratio_temp<-tableau$ratio_count
+    }
   Title = paste("")
   width = length(unique(tableau$date))
   span = 2/width + input$span*(width-2)/(10*width)
@@ -120,6 +123,7 @@ get_data_bis <- function(mot,from,to,resolution,tot_df){
   tot_df$ark=str_extract_all(tot_df$identifier,"12148/.+")
   tot_df$ark=str_remove_all(tot_df$ark,"12148/")
   tot_df$resultats<-0
+  tot_df$resultats_base<-0
   
   progress <- shiny::Progress$new()
   on.exit(progress$close())
@@ -134,20 +138,32 @@ get_data_bis <- function(mot,from,to,resolution,tot_df){
   resultat=str_remove_all(resultat,"searchtime.+")
   resultat=str_extract(resultat,"[:digit:]+")
   tot_df$resultats[i]<-as.integer(resultat)
+  
+  url_base<-str_c("https://gallica.bnf.fr/services/ContentSearch?ark=",tot_df$ark[i],"&query=%20")
+  resultat_base<-as.character(read_html(RETRY("GET",url_base,times = 3)))
+  resultat_base=str_remove_all(resultat_base,"[:space:]")
+  resultat_base=str_remove_all(resultat_base,".+countresults")
+  resultat_base=str_remove_all(resultat_base,"searchtime.+")
+  resultat_base=str_extract(resultat_base,"[:digit:]+")
+  tot_df$resultats_base[i]<-as.integer(resultat_base)
   if(as.integer(resultat)>0){tot_df$detect[i]<-TRUE}
   progress$inc(1/length(tot_df$ark), detail = paste(as.integer(i*100/length(tot_df$ark)),"% traités"))
   }
   tableau$count<-0
   tableau$detect<-0
+  tableau$count_base<-0
   for (j in 1:length(tableau$date)) {
     tableau$count[j]<-sum(tot_df$resultats[tot_df$date==tableau$date[j]])
+    tableau$count_base[j]<-sum(tot_df$resultats_base[tot_df$date==tableau$date[j]])
     tableau$detect[j]<-sum(tot_df$detect[tot_df$date==tableau$date[j]])
   }
   tableau$mot<-mot_init
   tableau$url<-"https://gallica.bnf.fr/"
-  colnames(tableau)<-c("date","base_temp","count","nb_temp","mot","url")
+  colnames(tableau)<-c("date","base_temp","count","nb_temp","base_count","mot","url")
   tableau$ratio_temp<-tableau$nb_temp/tableau$base_temp
+  tableau$ratio_count<-tableau$count/tableau$base_count
   tableau$ratio_temp[is.na(tableau$ratio_temp)]<-0
+  tableau$ratio_count[is.na(tableau$ratio_count)]<-0
   data = list(tableau,paste(mot),resolution)
   names(data) = c("tableau","mot","resolution")
   return(data)
@@ -375,6 +391,7 @@ ui <- navbarPage("Gallicagram",
                                             radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2, "Corpus personnalisé"=4),selected = 1),
                                             conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
                                             conditionalPanel(condition="input.doc_type == 2",fluidRow(column(1,p("")),column(3,radioButtons("search_mode", "Etudier_avec",choices = list("Gallicagram" = 1,"Google_Ngram" = 2),selected = 1)))),
+                                            conditionalPanel(condition="input.doc_type == 4",checkboxInput("occurrences_page", "Compter les occurrences par page", value = FALSE)),
                                             conditionalPanel(condition="input.doc_type == 4",fileInput('target_upload','', 
                                                       accept = c(
                                                         'text/csv',
@@ -413,8 +430,9 @@ ui <- navbarPage("Gallicagram",
                           tags$head(
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
-                                          sidebarPanel(checkboxInput("corpus_relative_p", "Afficher les résultats en valeurs relatives", value = FALSE),
-                                                       radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6,"Titre de presse" = 7),selected = 1),
+                                          sidebarPanel(
+                                            radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6,"Titre de presse" = 7),selected = 1),
+                                            checkboxInput("corpus_relative_p", "Afficher les résultats en valeurs relatives", value = FALSE)
                                           ),
                                           mainPanel(
                                             fluidRow(plotlyOutput("corpus1")),
@@ -426,8 +444,9 @@ ui <- navbarPage("Gallicagram",
                           tags$head(
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
-                                          sidebarPanel(checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE),
-                                                       radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7),selected = 1),
+                                          sidebarPanel(
+                                            radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7),selected = 1),
+                                            checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE)
                                           ),
                                           mainPanel(
                                             fluidRow(plotlyOutput("corpus2")),
