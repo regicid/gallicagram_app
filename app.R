@@ -391,7 +391,7 @@ ui <- navbarPage("Gallicagram",
                                             radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2, "Corpus personnalisé"=4),selected = 1),
                                             conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
                                             conditionalPanel(condition="input.doc_type == 2",fluidRow(column(1,p("")),column(3,radioButtons("search_mode", "Etudier_avec",choices = list("Gallicagram" = 1,"Google_Ngram" = 2),selected = 1)))),
-                                            conditionalPanel(condition="input.doc_type == 4",checkboxInput("occurrences_page", "Compter les occurrences par page", value = FALSE)),
+                                            conditionalPanel(condition="input.doc_type == 4",checkboxInput("occurrences_page", "Compter le nombre de pages correspondant à la recherche", value = FALSE)),
                                             conditionalPanel(condition="input.doc_type == 4",fileInput('target_upload','', 
                                                       accept = c(
                                                         'text/csv',
