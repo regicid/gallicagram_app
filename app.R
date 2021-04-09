@@ -428,8 +428,6 @@ ui <- navbarPage("Gallicagram",
                                                 ))),
                  tabPanel("Notice",shiny::includeMarkdown("Notice.md")),
                  tabPanel("Corpus de presse",fluidPage(),
-                          tags$head(
-                            tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
                                             radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6,"Titre de presse" = 7),selected = 1),
@@ -442,16 +440,16 @@ ui <- navbarPage("Gallicagram",
                           )
                  ),
                  tabPanel("Corpus de livres",fluidPage(),
-                          tags$head(
-                            tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
                                             radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7,"Qualité d'océrisation"=8,"Date de numérisation"=9),selected = 1),
-                                            checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE)
+                                            # conditionalPanel(condition="(input.corpus_relative_l==2 || input.corpus_relative_l==3 || input.corpus_relative_l==4 || input.corpus_relative_l==7)",
+                                                             checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE)
+                                                             # )
                                           ),
                                           mainPanel(
-                                            fluidRow(plotlyOutput("corpus2")),
-                                            p(""),
+                                            conditionalPanel(condition="input.corpus_relative_l!=8",fluidRow(plotlyOutput("corpus2")),
+                                                             p("")),
                                             conditionalPanel(condition="input.corpus_relative_l==8",img(src = "nqamoyen.png", height = 589, width = 681)),
                                             conditionalPanel(condition="input.corpus_relative_l==9",img(src = "numerisation.png", height = 589, width = 681)),
                                             p("")
@@ -460,7 +458,7 @@ ui <- navbarPage("Gallicagram",
                  ),
                  tabPanel("Tutoriel",headerPanel("Tutoriel"),
                           fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/SujS4t-ZGhQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'))),
-                 tabPanel(title=HTML("<li><a href='http://shiny.ens-paris-saclay.fr:443/gallicapresse/' target='_blank'>Gallicapresse"))
+                 tabPanel(title=HTML("<li><a href='http://shiny.ens-paris-saclay.fr/gallicapresse/' target='_blank'>Gallicapresse"))
 )
 
 
