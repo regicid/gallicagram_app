@@ -10,6 +10,7 @@ library(htmlwidgets)
 library(httr)
 library(ngramr)
 library(dplyr)
+library(htmltools)
 data = list()
 
 js <- "
