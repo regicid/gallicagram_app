@@ -798,10 +798,10 @@ server <- function(input, output,session){
 }
 
 
-compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
-a<-as.data.frame(cbind(as.character(Sys.Date()),1))
-colnames(a)=c("date","count")
-compteur<-rbind(compteur,a)
-write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
+# compteur<-read.csv("/home/benjamin/Bureau/compteur_gallicagram.csv",encoding = "UTF-8")
+# a<-as.data.frame(cbind(as.character(Sys.Date()),1))
+# colnames(a)=c("date","count")
+# compteur<-rbind(compteur,a)
+# write.csv(compteur,"/home/benjamin/Bureau/compteur_gallicagram.csv",fileEncoding = "UTF-8",row.names = FALSE)
 
 shinyApp(ui = ui, server = server)
