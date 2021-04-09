@@ -446,24 +446,28 @@ ui <- navbarPage("Gallicagram",
                             tags$style(HTML(".shiny-output-error-validation{color: red;}"))),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
-                                            radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7),selected = 1),
+                                            radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7,"Qualité d'océrisation"=8,"Date de numérisation"=9),selected = 1),
                                             checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE)
                                           ),
                                           mainPanel(
                                             fluidRow(plotlyOutput("corpus2")),
+                                            p(""),
+                                            conditionalPanel(condition="input.corpus_relative_l==8",img(src = "nqamoyen.png", height = 589, width = 681)),
+                                            conditionalPanel(condition="input.corpus_relative_l==9",img(src = "numerisation.png", height = 589, width = 681)),
                                             p("")
                                           )
                           )
                  ),
                  tabPanel("Tutoriel",headerPanel("Tutoriel"),
                           fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/SujS4t-ZGhQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'))),
-                 tabPanel(title=HTML("<li><a href='http://gallicagram.hopto.org:3838/gallicapresse/' target='_blank'>Gallicapresse"))
+                 tabPanel(title=HTML("<li><a href='http://shiny.ens-paris-saclay.fr:443/gallicapresse/' target='_blank'>Gallicapresse"))
 )
 
 
 
 # Define server logic required to draw a histogram
 server <- function(input, output,session){
+  
   output$legende1<-renderText(str_c("Corpus : presse\n"))
   observeEvent(
     input$doc_type,
@@ -737,6 +741,12 @@ server <- function(input, output,session){
         plot18<-layout(plot18, title="Distribution des livres en français \nselon leur état de numérisation", xaxis=list(title="Date",tickangle="-45",range=c("1380","2021")),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
 
         return(plot18)
+      }
+      else if(input$corpus_structure_l==9){
+        first_indexation_date<-read.csv("first_indexation_date.csv",encoding = "UTF-8")
+        plot4<-plot_ly(first_indexation_date,x=~first_indexation_date,y=~count,type='bar',colors="Dark2")
+        plot4<-layout(plot4, title="Distribution des livres en français \nselon leur date de numérisation", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack")
+        return(plot4)
       }
     }
     else if(input$corpus_relative_l==TRUE){
