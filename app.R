@@ -494,14 +494,11 @@ server <- function(input, output,session){
       else{output$legende=renderText("Source : gallica.bnf.fr")}
         })})
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
-  if(input$doc_type!=4 | input$occurrences_page!=TRUE){
-  output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_temp))," documents épluchés\n"))
-  output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés"))
-  }
-  if(input$doc_type==4 & input$occurrences_page==TRUE){
-    output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base_count))," pages épluchés\n"))
-    output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$count))," pages correspondant à la recherche"))
-  }
+  
+  output$legende2<-renderText(if(input$doc_type!=4 | input$occurrences_page!=TRUE){str_c(as.character(sum(data[["tableau"]]$base_temp))," documents épluchés\n")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau"]]$base_count))," pages épluchés\n")})
+  output$legende3<-renderText(if(input$doc_type!=4 | input$occurrences_page!=TRUE){str_c(as.character(sum(data[["tableau"]]$nb_temp))," résultats trouvés")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau"]]$count))," pages correspondant à la recherche")})
+
+ 
   output$downloadData <- downloadHandler(
     filename = function() {
       paste('data-', Sys.Date(), '.csv', sep='')
