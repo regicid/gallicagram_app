@@ -23,7 +23,6 @@ window.open(url);
 }"
 
 Plot <- function(data,input){
-  
   if((input$search_mode==2 & input$doc_type==1)|input$search_mode!=2)
   {
   tableau = data[["tableau"]]
@@ -33,12 +32,13 @@ Plot <- function(data,input){
   Title = paste("")
   width = length(unique(tableau$date))
   span = 2/width + input$span*(width-2)/(10*width)
-  tableau$loess = tableau$nb_temp
+  tableau$loess = tableau$ratio_temp
+  if(input$span >0){
   for(mot in str_split(data$mot,"&")[[1]]){
     z = which(tableau$mot==mot)
     x = 1:length(z)
     tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
-  }
+  }}
   tableau$hovers = str_c(tableau$date,": x/N = ",tableau$nb_temp,"/",tableau$base_temp,"\n                 = ",round(tableau$ratio_temp*100,digits = 1),"%")
   plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
   #plot = onRender(plot,js)
