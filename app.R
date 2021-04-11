@@ -87,12 +87,13 @@ Plot <- function(data,input){
     Title = paste("")
     width = length(unique(tableau$date))
     span = 2/width + input$span*(width-2)/(10*width)
-    tableau$loess = NA
+    tableau$loess = tableau$ratio_temp
+    if(input$span >0){
     for(mot in mots){
       z = which(tableau$mot==mot)
       x = 1:length(z)
       tableau$loess[z] = loess(tableau$ratio_temp[z]~x,span=span)$fitted
-    }
+    }}
     tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio_temp*100,digits = 5),"%")
     ngram=plot_ly(tableau,x=~date,y=~loess,color=~mot,text=~hovers,type='scatter',mode='spline',hoverinfo="text")
     y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".5%")
