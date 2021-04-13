@@ -431,7 +431,7 @@ ui <- navbarPage("Gallicagram",
                  tabPanel("Corpus de presse",fluidPage(),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
-                                            radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6,"Titre de presse" = 7),selected = 1),
+                                            radioButtons("corpus_structure_p", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Mode d'accès"=3,"Bibliothèque d'origine"=4, "Classement thématique de Dewey" = 5,"Périodicité" = 6),selected = 1),
                                             conditionalPanel(condition="input.corpus_structure_p!=1",checkboxInput("corpus_relative_p", "Afficher les résultats en valeurs relatives", value = FALSE))
                                           ),
                                           mainPanel(
@@ -443,10 +443,11 @@ ui <- navbarPage("Gallicagram",
                  tabPanel("Corpus de livres",fluidPage(),
                           pageWithSidebar(headerPanel(''),
                                           sidebarPanel(
-                                            radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7,"Qualité d'océrisation"=8,"Date de numérisation"=9),selected = 1),
-                                            conditionalPanel(condition="(input.corpus_structure_l==2 || input.corpus_structure_l==3 || input.corpus_structure_l==4 || input.corpus_structure_l==7)",
+                                            radioButtons("corpus_structure_l", "Données à analyser :",choices = list("Distribution"=1,"Ville de publication" = 2,"Droits d'auteur" = 3, "Bibliothèque d'origine" = 4,"Volume (nombre de pages moyen)" = 5,"Volume (nombre de pages médian)" = 6,"Etat de la numérisation"=7,"Qualité d'océrisation"=8,"Date de numérisation"=9, "Classement thématique de Dewey" = 10),selected = 1),
+                                            conditionalPanel(condition="(input.corpus_structure_l==2 || input.corpus_structure_l==3 || input.corpus_structure_l==4 || input.corpus_structure_l==7 || input.corpus_structure_l==10)",
                                                              checkboxInput("corpus_relative_l", "Afficher les résultats en valeurs relatives", value = FALSE)
-                                                             )
+                                                             ),
+                                            conditionalPanel(condition="input.corpus_structure_l==1",checkboxInput("corpus_ngram_l", "Distribution des livres dans Google Ngram Viewer", value = FALSE))
                                           ),
                                           mainPanel(
                                             conditionalPanel(condition="input.corpus_structure_l!=8",fluidRow(plotlyOutput("corpus2")),
@@ -580,12 +581,6 @@ server <- function(input, output,session){
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
-      else if(input$corpus_structure_p==7){
-        p_titres<-read.csv("p_titres.csv",encoding = "UTF-8")
-        plot3<-plot_ly(p_titres,x=~as.integer(p_titres$date),y=~n,color=~principaux_titres,type='bar',colors="Dark2")
-        plot3<-layout(plot3, title="Distribution des numéros de presse en français \nselon le journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
-        return(plot3)
-      }
       else if(input$corpus_structure_p==2){
         p_villes<-read.csv("p_villes.csv",encoding = "UTF-8")
         plot7<-plot_ly(p_villes,x=~as.integer(p_villes$date),y=~n,color=~principales_villes,type='bar',colors="Dark2")
@@ -607,7 +602,7 @@ server <- function(input, output,session){
       else if(input$corpus_structure_p==3){
         p_droits<-read.csv("p_droits.csv",encoding = "UTF-8")
         plot5<-plot_ly(p_droits,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
-        plot5<-layout(plot5, title="Distribution des numéros de presse en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        plot5<-layout(plot5, title="Distribution des numéros de presse en français \nselon leur mode d'accès", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
         return(plot5)
       }
       else if(input$corpus_structure_p==4){
@@ -632,12 +627,6 @@ server <- function(input, output,session){
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
-      else if(input$corpus_structure_p==7){
-        p_titres<-read.csv("p_titres.csv",encoding = "UTF-8")
-        plot4<-plot_ly(p_titres,x=~as.integer(p_titres$date),y=~n,color=~principaux_titres,type='bar',colors="Dark2")
-        plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4),title="Distribution des numéros de presse en français \nselon le journal d'origine", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
-        return(plot4)
-      }
       else if(input$corpus_structure_p==2){
         p_villes<-read.csv("p_villes.csv",encoding = "UTF-8")
         plot8<-plot_ly(p_villes,x=~as.integer(p_villes$date),y=~n,color=~principales_villes,type='bar',colors="Dark2")
@@ -659,7 +648,7 @@ server <- function(input, output,session){
       else if(input$corpus_structure_p==3){
         p_droits<-read.csv("p_droits.csv",encoding = "UTF-8")
         plot5<-plot_ly(p_droits,x=~date,y=~n,color=~rights,type='bar',colors="Dark2")
-        plot5<-layout(plot5, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon leur régime juridique", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
+        plot5<-layout(plot5, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des numéros de presse en français \nselon leur mode d'accès", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",barnorm="percent",bargap=0)
         return(plot5)
       }
       else if(input$corpus_structure_p==4){
@@ -681,14 +670,24 @@ server <- function(input, output,session){
   corpus_display_l<-function() {
     
     if(input$corpus_relative_l==FALSE){
-      if(input$corpus_structure_l==1){
+      if(input$corpus_structure_l==1 & input$corpus_ngram_l==FALSE){
         table<-read.csv("base_livres_annees.csv",encoding="UTF-8")
         somme<-sum(table$base_temp)
         table<-table[table$date>=1450,]
         table$hovers = str_c(table$date,": N = ",table$base_temp)
         plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-        Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=true&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres océrisés dans Gallica<b> </a>")
+        Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=true&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres en français océrisés\ndans Gallica<b> </a>")
         y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
+        x <- list(title = "Date",titlefont = 41)
+        plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
+        return(plot2)
+      }
+      else if(input$corpus_structure_l==1 & input$corpus_ngram_l==TRUE){
+        ngram<-read.csv("ngram_viewer_fre_20200217.csv",encoding = "UTF-8")
+        total_volume_count<-sum(ngram$volume_count)
+        plot2<-plot_ly(ngram, x=~year,y=~volume_count,type='bar')
+        Title = paste("<b>Répartition des ",total_volume_count," livres océrisés et en français\nexploités dans"," <a href = 'https://books.google.com/ngrams/graph?content=Joffre%2CP%C3%A9tain%2CFoch&year_start=1914&year_end=1920&corpus=30&smoothing=0'>Google Ngram Viewer</a><b>")
+        y <- list(title = "Nombre de livres exploités dans Ngram Viewer",titlefont = 41)
         x <- list(title = "Date",titlefont = 41)
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
@@ -758,16 +757,32 @@ server <- function(input, output,session){
         plot4<-layout(plot4, title="Distribution des livres en français \nselon leur date de numérisation", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack")
         return(plot4)
       }
+      else if(input$corpus_structure_l==10){
+        p_dewey_livres<-read.csv("p_themes_livres.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_dewey_livres,x=~date,y=~n,color=~dewey_nom,type='bar',colors="Dark2")
+        plot4<-layout(plot4, title="Distribution des livres en français \nselon leur classement thématique Dewey", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack",bargap=0)
+        return(plot4)
+      }
     }
     else if(input$corpus_relative_l==TRUE){
-      if(input$corpus_structure_l==1){
+      if(input$corpus_structure_l==1 & input$corpus_ngram_l==FALSE){
         table<-read.csv("base_livres_annees.csv",encoding="UTF-8")
         somme<-sum(table$base_temp)
         table<-table[table$date>=1450,]
         table$hovers = str_c(table$date,": N = ",table$base_temp)
         plot2<-plot_ly(table, x=~date,y=~base_temp,text=~hovers,type='bar',hoverinfo="text")
-        Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=true&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres océrisés dans Gallica<b> </a>")
+        Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=true&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres en français océrisés\ndans Gallica<b> </a>")
         y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
+        x <- list(title = "Date",titlefont = 41)
+        plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
+        return(plot2)
+      }
+      else if(input$corpus_structure_l==1 & input$corpus_ngram_l==TRUE){
+        ngram<-read.csv("ngram_viewer_fre_20200217.csv",encoding = "UTF-8")
+        total_volume_count<-sum(ngram$volume_count)
+        plot2<-plot_ly(ngram, x=~year,y=~volume_count,type='bar')
+        Title = paste("<b>Répartition des ",total_volume_count," livres océrisés et en français\nexploités dans"," <a href = 'https://books.google.com/ngrams/graph?content=Joffre%2CP%C3%A9tain%2CFoch&year_start=1914&year_end=1920&corpus=30&smoothing=0'>Google Ngram Viewer</a><b>")
+        y <- list(title = "Nombre de livres exploités dans Ngram Viewer",titlefont = 41)
         x <- list(title = "Date",titlefont = 41)
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
@@ -835,6 +850,12 @@ server <- function(input, output,session){
         first_indexation_date<-read.csv("first_indexation_date.csv",encoding = "UTF-8")
         plot4<-plot_ly(first_indexation_date,x=~first_indexation_date,y=~count,type='bar',colors="Dark2")
         plot4<-layout(plot4, title="Distribution des livres en français \nselon leur date de numérisation", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Nombre de documents"),barmode="stack")
+        return(plot4)
+      }
+      else if(input$corpus_structure_l==10){
+        p_dewey_livres<-read.csv("p_themes_livres.csv",encoding = "UTF-8")
+        plot4<-plot_ly(p_dewey_livres,x=~date,y=~n,color=~dewey_nom,type='bar',colors="Dark2")
+        plot4<-layout(plot4, margin = list(l = 50, r = 50, b = 50, t = 50, pad = 4), title="Distribution des livres en français \nselon leur classement thématique Dewey", xaxis=list(title="Date",tickangle="-45"),yaxis=list(title="Part des documents à chaque période"),barmode="stack",bargap=0,barnorm="percent")
         return(plot4)
       }
     
