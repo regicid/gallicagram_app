@@ -40,14 +40,15 @@ shinyUI(navbarPage("Gallicagram",
                                                                  selectInput("resolution", label = "Résolution", choices = c("Année","Mois"))),
                                                 conditionalPanel(condition="input.doc_type == 2",
                                                                  selectInput("resolution", label = "Résolution", choices = c("Année"))),
-                                                actionButton("do","Générer le graphique")
+                                                actionButton("do","Générer le graphique"),
+                                                p(""),
+                                                sliderInput("span","Lissage de la courbe",min = 0,max = 10,value = 0)
                                             ),
                                             
                                             mainPanel(dropdownButton(tags$h3("Options avancées"),
                                                                      checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
                                                                      checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
                                                                      checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE),
-                                                                     sliderInput("span","Lissage de la courbe",min = 0,max = 10,value = 0),
                                                                      circle = TRUE, status = "default",
                                                                      icon = icon("sliders"), width = "300px",
                                                                      tooltip = tooltipOptions(title = "Afficher les options avancées")
