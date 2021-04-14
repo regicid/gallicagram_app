@@ -11,6 +11,7 @@ library(httr)
 library(ngramr)
 library(dplyr)
 library(htmltools)
+library(shinyWidgets)
 
 shinyUI(navbarPage("Gallicagram",
                    tabPanel("Graphique",fluidPage(),
@@ -21,8 +22,9 @@ shinyUI(navbarPage("Gallicagram",
                                                 textInput("mot","Terme(s) à chercher","Joffre&Pétain&Foch"),
                                                 conditionalPanel(condition="input.doc_type != 4",p('Séparer les termes par un "&" pour une recherche multiple')),
                                                 conditionalPanel(condition="input.doc_type != 4",p('Utiliser "a+b" pour rechercher a OU b')),
+                                                conditionalPanel(condition="input.doc_type != 4",p('Cliquer sur un point du graphique pour accéder aux documents dans Gallica')),
                                                 conditionalPanel(condition="input.doc_type == 4",p('Recherche limitée à un seul syntagme')),
-                                                radioButtons("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2, "Corpus personnalisé"=4),selected = 1),
+                                                selectInput("doc_type", "Corpus",choices = list("Presse" = 1,"Recherche par titre de presse" = 3, "Livres" = 2, "Corpus personnalisé"=4),selected = 1),
                                                 conditionalPanel(condition="input.doc_type == 3",selectizeInput("titres","Titre des journaux",choices = "",selected=NULL,multiple = TRUE)),
                                                 conditionalPanel(condition="input.doc_type == 2",fluidRow(column(1,p("")),column(3,radioButtons("search_mode", "Etudier_avec",choices = list("Gallicagram" = 1,"Google_Ngram" = 2),selected = 1)))),
                                                 conditionalPanel(condition="input.doc_type == 4",checkboxInput("occurrences_page", "Compter le nombre de pages correspondant à la recherche", value = FALSE)),
@@ -38,13 +40,18 @@ shinyUI(navbarPage("Gallicagram",
                                                                  selectInput("resolution", label = "Résolution", choices = c("Année","Mois"))),
                                                 conditionalPanel(condition="input.doc_type == 2",
                                                                  selectInput("resolution", label = "Résolution", choices = c("Année"))),
-                                                actionButton("do","Générer le graphique"),
-                                                checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
-                                                checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
-                                                checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE)
+                                                actionButton("do","Générer le graphique")
                                             ),
                                             
-                                            mainPanel(plotlyOutput("plot"),
+                                            mainPanel(dropdownButton(tags$h3("Options avancées"),
+                                                                     checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
+                                                                     checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
+                                                                     checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE),
+                                                                     circle = TRUE, status = "default",
+                                                                     icon = icon("sliders"), width = "300px",
+                                                                     tooltip = tooltipOptions(title = "Afficher les options avancées")
+                                                                     ),
+                                                      plotlyOutput("plot"),
                                                       fluidRow(textOutput("legende"),align="right"),
                                                       conditionalPanel(condition="(input.doc_type == 2 && input.search_mode==1) || input.doc_type != 2",fluidRow(textOutput("legende0"),align="right")),
                                                       fluidRow(textOutput("legende1"),align="right"),
@@ -92,5 +99,5 @@ shinyUI(navbarPage("Gallicagram",
                    ),
                    tabPanel("Tutoriel",headerPanel("Tutoriel"),
                             fluidPage(HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/SujS4t-ZGhQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'))),
-                   tabPanel(title=HTML("<li><a href='https://shiny.ens-paris-saclay.fr/gallicapresse' target='_blank'>Gallicapresse"))
+                   tabPanel(title=HTML("<li><a href='https://shiny.ens-paris-saclay.fr/app/gallicapresse' target='_blank'>Gallicapresse"))
 ))
