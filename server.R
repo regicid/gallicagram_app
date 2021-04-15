@@ -14,6 +14,7 @@ library(htmltools)
 data = list()
 memoire=read.csv("exemple.csv",encoding="UTF-8")
 memoire$date=as.character(memoire$date)
+recherche_precedente="Joffre&Pétain&Foch"
 
 js <- "
 function(el, x) {
@@ -292,7 +293,6 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   if(doc_type==4){tableau$corpus="perso_gallica"
   tableau$search_mode<-"volume"}
   memoire<<-bind_rows(memoire,tableau)
-  print(memoire)
   data = list(tableau,paste(mots,collapse="&"),resolution)
   names(data) = c("tableau","mot","resolution")
   return(data)}
@@ -313,8 +313,45 @@ prepare_correlation<-function(df){
   colnames(df)=mots
   return(df)
 }
+
 #########
-correlation_matrix <- function(df, input,
+prepare_memoire<-function(){
+  df<-distinct(memoire)
+  mots<-unlist(unique(df$mot))
+  df_liste<-list(df[df$mot==mots[1],])
+  for (i in 2:length(mots)) {
+    a<-list(df[df$mot==mots[i],])
+    df_liste<-c(df_liste,a)
+  }
+  
+  for (i in 1:length(df_liste)) {
+    df<-as.data.frame(df_liste[i])
+    df$mot<-str_c(df$mot,"_",df$search_mode,"_",df$corpus)
+    df<-select(df,date,ratio,mot)
+    mots<-unlist(unique(df$mot))
+    a<-df$ratio[df$mot==mots[1]]
+    if (length(mots)>=2){
+      for (j in 2:length(mots)) {
+        a<-cbind(a,df$ratio[df$mot==mots[j]])
+    }}
+    df=as.data.frame(a)
+    colnames(df)=mots
+    df_liste[i]<-list(df)
+  }
+  j=length(df_liste)
+  for (i in 1:j) {
+    if(sum(is.na(colnames(df_liste[[i]])))>=1){
+      df_liste<-df_liste[-i]
+      i=i-1
+      j=j-1
+      }
+  }
+  
+  
+  return(df_liste)
+}
+#########
+correlation_matrix <- function(df, corr,
                                type = "pearson",
                                digits = 3, 
                                decimal.mark = ".",
@@ -323,7 +360,7 @@ correlation_matrix <- function(df, input,
                                replace_diagonal = TRUE, 
                                replacement = ""){
   
-  mots = str_split(input$mot,"&")[[1]]
+  mots = colnames(df)
   # check arguments
   stopifnot({
     is.numeric(digits)
@@ -378,8 +415,12 @@ correlation_matrix <- function(df, input,
   } else if (replace_diagonal) {
     diag(Rnew) <- replacement
   }
-  Rnew<-Rnew[-length(mots),]
-  Rnew<-Rnew[,-1]
+  if(corr=="corr1" & length(mots)>=3)
+  {Rnew<-Rnew[-length(mots),]
+  Rnew<-Rnew[,-1]}
+  if(corr=="corr2" & nrow(Rnew)>=3)
+  {Rnew<-Rnew[-nrow(Rnew),]
+  Rnew<-Rnew[,-1]}
   return(Rnew)
 }
 options(shiny.maxRequestSize = 100*1024^2)
@@ -411,7 +452,7 @@ shinyServer(function(input, output,session){
     })
   
   output$plot <- renderPlotly({Plot(data,input)})
-  output$corr<-renderTable(correlation_matrix(prepare_correlation(data),input),rownames = TRUE)
+  output$corr<-renderTable(correlation_matrix(prepare_correlation(data),"corr1"),rownames = TRUE)
   output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
   observeEvent(input$search_mode,{observeEvent(input$doc_type,{
     if(input$search_mode==2 & input$doc_type==2)
@@ -470,7 +511,35 @@ shinyServer(function(input, output,session){
     
     output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base))," numéros épluchés\n"))
     output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," résultats trouvés"))
-    output$corr<-renderTable(correlation_matrix(prepare_correlation(df),input),rownames = TRUE)
+    if(str_detect(input$mot,".+&.+"))
+    {output$corr<-renderTable(correlation_matrix(prepare_correlation(df),"corr1"),rownames = TRUE)}
+    else{output$corr<-renderTable(as.matrix(NA),colnames = FALSE)}
+    if(recherche_precedente==str_c(input$mot)){
+    matrice2<-prepare_memoire()
+    j=length(matrice2)
+    for (i in j:1) {
+      if(length(matrice2[[i]])<=1){
+        matrice2<-matrice2[-i]
+      }
+    }
+    b<-correlation_matrix(as.data.frame(matrice2[1]),"corr2")
+    b<-rbind(colnames(b),b)
+    b<-cbind(rownames(b),b)
+    colnames(b)<-NULL
+    rownames(b)<-NULL
+    if(length(matrice2)>1){
+    for (j in 2:length(matrice2)) {
+      a<-correlation_matrix(as.data.frame(matrice2[[j]]),"corr2")
+      a<-rbind(colnames(a),a)
+      a<-cbind(rownames(a),a)
+      colnames(a)<-NULL
+      rownames(a)<-NULL
+      b<-bind_rows(as.data.frame(b),as.data.frame(a))
+    }}
+    print(b)
+    output$corr2<-renderTable(b,colnames = FALSE)
+    }
+    recherche_precedente<<-str_c(input$mot)
     
     output$downloadData <- downloadHandler(
       filename = function() {
