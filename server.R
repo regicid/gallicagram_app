@@ -12,8 +12,8 @@ library(ngramr)
 library(dplyr)
 library(htmltools)
 data = list()
-memoire=list()
-ngram_table=as.data.frame(c(NA))
+memoire=read.csv("exemple.csv",encoding="UTF-8")
+memoire$date=as.character(memoire$date)
 
 js <- "
 function(el, x) {
@@ -271,6 +271,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   base_ngram<-select(base_ngram,year,match_count)
   colnames(base_ngram)<-c("date","base")
   tableau<-left_join(tableau,base_ngram,by="date")
+  tableau$date<-as.character(tableau$date)
   tableau$count<-as.integer(tableau$base*tableau$ratio)
   tableau$url<-""
   for (i in 1:length(tableau$date)) {
@@ -281,12 +282,17 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   format = "%Y"
   if(resolution=="Mois"){format=paste(format,"%m",sep="/")}
   tableau.date = as.Date(as.character(tableau$date),format=format)
-  if(doc_type==1){tableau$corpus="presse_gallica"}
-  if(doc_type==2 & search_mode==1){tableau$corpus="livres_gallica"}
-  if(doc_type==2 & search_mode==2){tableau$corpus="livres_ngram"
-  ngram_table<<-tableau}
-  if(doc_type==3){tableau$corpus="titre_presse_gallica"}
-  if(doc_type==4){tableau$corpus="perso_gallica"}
+  if(doc_type==1){tableau$corpus="presse_gallica"
+  tableau$search_mode<-"volume"}
+  if(doc_type==2 & search_mode==1){tableau$corpus="livres_gallica"
+  tableau$search_mode<-"volume"}
+  if(doc_type==2 & search_mode==2){tableau$corpus="livres_ngram"}
+  if(doc_type==3){tableau$corpus="titre_presse_gallica"
+  tableau$search_mode<-"volume"}
+  if(doc_type==4){tableau$corpus="perso_gallica"
+  tableau$search_mode<-"volume"}
+  memoire<<-bind_rows(memoire,tableau)
+  print(memoire)
   data = list(tableau,paste(mots,collapse="&"),resolution)
   names(data) = c("tableau","mot","resolution")
   return(data)}
@@ -433,7 +439,13 @@ shinyServer(function(input, output,session){
     content = function(con) {
       htmlwidgets::saveWidget(as_widget(Plot(data,input)), con)
     })
-  
+  output$data_session <- downloadHandler(
+    filename = function() {
+      paste('data-session-', Sys.Date(), '.csv', sep='')
+    },
+    content = function(con) {
+      write.csv(memoire, con,row.names = F,fileEncoding = "UTF-8")
+    })
   
   observeEvent(input$do,{
     # datasetInput <- reactive({

@@ -47,6 +47,7 @@ shinyUI(navbarPage("Gallicagram",
                                                                      checkboxInput("barplot", "Afficher la distribution des documents\nde la base Gallica sur la période", value = FALSE),
                                                                      checkboxInput("correlation_test", "Afficher la matrice de corrélation", value = FALSE),
                                                                      checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE),
+                                                                     downloadButton("data_session","Télécharger les données de la session"),
                                                                      circle = TRUE, status = "default",
                                                                      icon = icon("sliders"), width = "300px",
                                                                      tooltip = tooltipOptions(title = "Afficher les options avancées")
