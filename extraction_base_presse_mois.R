@@ -76,13 +76,13 @@ for (i in from:to){
     }
   }
 }
-colnames(tableau)<-c("date","nb_temp","base_temp","mot")
+colnames(tableau)<-c("date","nb_temp","base","mot")
 format = "%Y"
 if(resolution=="Mois"){format=paste(format,"%m",sep="/")}
 tableau.date = as.Date(as.character(tableau$date),format=format)
 tableau$nb_temp<-as.integer(tableau$nb_temp)
-tableau$base_temp<-as.integer(tableau$base_temp)
-tableau$ratio_temp<-tableau$nb_temp/tableau$base_temp
+tableau$base<-as.integer(tableau$base)
+tableau$ratio_temp<-tableau$nb_temp/tableau$base
 tableau$ratio_temp[is.na(tableau$ratio_temp)]<-0
 
 tableau<-tableau[,-2]
