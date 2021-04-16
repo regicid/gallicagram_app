@@ -313,9 +313,15 @@ prepare_correlation<-function(df){
 }
 
 #########
-prepare_memoire<-function(from,to){
+prepare_memoire<-function(from,to,resolution){
   df<-memoire
   df<-distinct(df)
+  if(resolution=="Mois"){
+    from=str_c(from,"/01")
+    to=str_c(to,"/12")
+    df<-df[str_length(df$date)==7,]
+  }
+  else{df<-df[str_length(df$date)==4,]}
   df<-df[df$date<=to,]
   df<-df[df$date>=from,]
   mots<-unlist(unique(df$mot))
@@ -327,7 +333,7 @@ prepare_memoire<-function(from,to){
   
   for (i in 1:length(df_liste)) {
     df<-as.data.frame(df_liste[i])
-    df$mot<-str_c(df$mot,"_",df$search_mode,"_",df$corpus)
+    df$mot<-str_c(df$mot,"_",df$search_mode,"_",df$corpus,"_",df$resolution)
     df<-select(df,date,ratio,mot)
     mots<-unlist(unique(df$mot))
     a<-df$ratio[df$mot==mots[1]]
@@ -339,16 +345,6 @@ prepare_memoire<-function(from,to){
     colnames(df)=mots
     df_liste[i]<-list(df)
   }
-  j=length(df_liste)
-  for (i in 1:j) {
-    if(sum(is.na(colnames(df_liste[[i]])))>=1){
-      df_liste<-df_liste[-i]
-      i=i-1
-      j=j-1
-      }
-  }
-  
-  
   return(df_liste)
 }
 #########
@@ -430,7 +426,7 @@ shinyServer(function(input, output,session){
   
   memoire<<-read.csv("exemple.csv",encoding="UTF-8")
   memoire$date<<-as.character(memoire$date)
-  recherche_precedente<<-"Joffre&Pétain&Foch_1914_1920"
+  recherche_precedente<<-"Joffre&Pétain&Foch_1914_1920_Année"
   
   output$instructions <- renderUI(HTML('<ul><li>Séparer les termes par un "&" pour une recherche multiple</li><li>Utiliser "a+b" pour rechercher a OU b</li><li>Cliquer sur un point du graphique pour accéder aux documents dans Gallica</li></ul>'))
   
@@ -520,8 +516,8 @@ shinyServer(function(input, output,session){
     {output$corr<-renderTable(correlation_matrix(prepare_correlation(df),"corr1"),rownames = TRUE)}
     else{output$corr<-renderTable(as.matrix(NA),colnames = FALSE)}
     
-    if(recherche_precedente==str_c(input$mot,"_",input$beginning,"_",input$end)){
-    matrice2<-prepare_memoire(input$beginning,input$end)
+    if(recherche_precedente==str_c(input$mot,"_",input$beginning,"_",input$end,"_",input$resolution)){
+    matrice2<-prepare_memoire(input$beginning,input$end,input$resolution)
     j=length(matrice2)
     for (i in j:1) {
       if(length(matrice2[[i]])<=1){
@@ -545,7 +541,7 @@ shinyServer(function(input, output,session){
     output$corr2<-renderTable(b,colnames = FALSE)
     }
     else{output$corr2<-renderTable(as.matrix(NA),colnames = FALSE)}
-    recherche_precedente<<-str_c(input$mot,"_",input$beginning,"_",input$end)
+    recherche_precedente<<-str_c(input$mot,"_",input$beginning,"_",input$end,"_",input$resolution)
     
     output$downloadData <- downloadHandler(
       filename = function() {
