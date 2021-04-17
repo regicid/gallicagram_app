@@ -498,21 +498,21 @@ shinyServer(function(input, output,session){
   
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste('data-', Sys.Date(), '.csv', sep='')
+      paste("data_",input$mot,"_",input$beginning,"_",input$end,'.csv', sep='')
     },
     content = function(con) {
       write.csv(data$tableau, con,row.names = F,fileEncoding = "UTF-8")
     })
   output$downloadPlot <- downloadHandler(
     filename = function() {
-      paste('plot-', Sys.Date(), '.html', sep='')
+      paste('plot_',input$mot,"_",input$beginning,"_",input$end,'.html', sep='')
     },
     content = function(con) {
       htmlwidgets::saveWidget(as_widget(Plot(data,input)), con)
     })
   output$data_session <- downloadHandler(
     filename = function() {
-      paste('data-session-', Sys.Date(), '.csv', sep='')
+      paste('data-session_', Sys.Date(),'.csv', sep='')
     },
     content = function(con) {
       write.csv(memoire, con,row.names = F,fileEncoding = "UTF-8")
@@ -574,14 +574,14 @@ shinyServer(function(input, output,session){
     
     output$downloadData <- downloadHandler(
       filename = function() {
-        paste('data-', Sys.Date(), '.csv', sep='')
+        paste("data_",input$mot,"_",input$beginning,"_",input$end,'.csv', sep='')
       },
       content = function(con) {
         write.csv(df$tableau, con,row.names = F,fileEncoding = "UTF-8")
       })
     output$downloadPlot <- downloadHandler(
       filename = function() {
-        paste('plot-', Sys.Date(), '.html', sep='')
+        paste('plot_',input$mot,"_",input$beginning,"_",input$end,'.html', sep='')
       },
       content = function(con) {
         htmlwidgets::saveWidget(as_widget(Plot(df,input)), con)
