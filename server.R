@@ -210,7 +210,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
           ark2<-str_c("%20or%20dc.relation%20any%20%22",ark,"%22")
           ark3<-str_c(ark3,ark2)
         }
-      }else
+      }else if(doc_type==3 & length(titres)=1)
       {
         ark1<-titres
         ark3<-""
