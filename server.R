@@ -304,7 +304,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   tableau$count<-0
   tableau$url<-""
   for (i in 1:length(tableau$date)) {
-      tableau$url[i]=str_c("https://www.google.fr/search?lr=lang_fr&hl=fr&tbo=p&tbm=bks&q=",tableau$mot[i],"&tbs=,bkt:b,cdr:1,cd_min:1+janv.+",tableau$date[i],",cd_max:31+d%C3%A9c.+",tableau$date[i],"&num=20")
+    tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_fr") 
   }
   }
   tableau$resolution<-resolution
