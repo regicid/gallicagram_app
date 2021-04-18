@@ -44,12 +44,23 @@ Plot <- function(data,input){
         x = 1:length(z)
         tableau$loess[z] = loess(tableau$ratio[z]~x,span=span)$fitted
       }}
+    
+    dn<-as.character(max(format(tableau$ratio,scientific=FALSE)))
+    if(max(tableau$ratio)>=0.1){digit_number=".1%"}
+    else{
+    digit_number=str_extract(dn,"\\..+")
+    digit_number=str_replace(digit_number,"\\.","")
+    digit_number=str_extract(digit_number,"0+")
+    digit_number<-str_length(digit_number)
+    digit_number<-str_c(".",digit_number,"%")
+    }
+    
     tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")
-    y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".1%")
+    y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
     x <- list(title = data[["resolution"]],titlefont = 41)
     if(input$search_mode==2 &input$doc_type==2){
       tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio*100,digits = 5),"%")
-      y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = ".5%")
+      y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
       }
     plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
     plot = layout(plot, yaxis = y, xaxis = x,title = Title)
@@ -61,7 +72,7 @@ Plot <- function(data,input){
       tableau$delta[tableau$mot==unlist(mots)[1]]<-loess((tableau$ratio[tableau$mot==unlist(mots)[1]]-tableau$ratio[tableau$mot==unlist(mots)[2]]~x),span=span)$fitted
       tableau$hovers2 = str_c(tableau$date,": delta = ",round(tableau$delta*100,digits=2),"%, N = ",tableau$base)
       plot = plot_ly(filter(tableau,mot==unlist(mots)[[1]]), x=~date,y=~delta,text=~hovers2,type='scatter',mode='spline',hoverinfo="text")
-      y <- list(title = "Différence de fréquence\nd'occurrence dans le corpus",titlefont = 41,tickformat = ".1%")
+      y <- list(title = "Différence de fréquence\nd'occurrence dans le corpus",titlefont = 41,tickformat = digit_number)
       x <- list(title = data[["resolution"]],titlefont = 41)
       Title = paste("Freq(",unlist(mots)[1],") – Freq(",unlist(mots)[2],")")
       Title=str_remove_all(Title," ")
