@@ -11,7 +11,9 @@ library(httr)
 library(ngramr)
 library(dplyr)
 library(htmltools)
-data = list()
+
+
+
 
 
 js <- "
@@ -286,12 +288,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   tableau=ngrami(mots,corpus = "fre_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)
   tableau$search_mode<-"match"
   colnames(tableau)=c("date","mot","ratio","corpus","search_mode")
-  base_ngram<-read.csv("ngram_viewer_fre_20200217.csv",encoding = "UTF-8")
-  base_ngram<-select(base_ngram,year,match_count)
-  colnames(base_ngram)<-c("date","base")
-  tableau<-left_join(tableau,base_ngram,by="date")
+  tableau$base<-0
   tableau$date<-as.character(tableau$date)
-  tableau$count<-as.integer(tableau$base*tableau$ratio)
+  tableau$count<-0
   tableau$url<-""
   for (i in 1:length(tableau$date)) {
       tableau$url[i]=str_c("https://www.google.fr/search?lr=lang_fr&hl=fr&tbo=p&tbm=bks&q=",tableau$mot[i],"&tbs=,bkt:b,cdr:1,cd_min:1+janv.+",tableau$date[i],",cd_max:31+d%C3%A9c.+",tableau$date[i],"&num=20")
@@ -315,8 +314,6 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   names(data) = c("tableau","mot","resolution")
   return(data)}
 
-data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
-names(data)=c("tableau","mot","resolution")
 
 #########
 prepare_correlation<-function(df){
@@ -443,7 +440,8 @@ correlation_matrix <- function(df, corr,
 options(shiny.maxRequestSize = 100*1024^2)
 
 shinyServer(function(input, output,session){
-  
+  data=list(read.csv("exemple.csv",encoding = "UTF-8"),"Joffre&Pétain&Foch","Années")
+  names(data)=c("tableau","mot","resolution")
   memoire<<-read.csv("exemple.csv",encoding="UTF-8")
   memoire$date<<-as.character(memoire$date)
   recherche_precedente<<-"Joffre&Pétain&Foch_1914_1920_Année"
@@ -493,8 +491,8 @@ shinyServer(function(input, output,session){
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   observeEvent(
     input$occurrences_page,{
-      output$legende2<-renderText(if(input$doc_type!=4 | input$occurrences_page!=TRUE){str_c(as.character(sum(data[["tableau"]]$base))," documents épluchés\n")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau"]]$base_count))," pages épluchées\n")})
-      output$legende3<-renderText(if(input$doc_type!=4 | input$occurrences_page!=TRUE){str_c(as.character(sum(data[["tableau"]]$count))," résultats trouvés")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau"]]$count))," pages correspondant à la recherche")})
+      output$legende2<-renderText(if(input$doc_type!=4){str_c(as.character(sum(data[["tableau"]]$base))," documents épluchés\n")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau_page"]]$base))," pages épluchées\n")}else if(input$doc_type==4 & input$occurrences_page==FALSE){str_c(as.character(sum(data[["tableau_volume"]]$base))," documents épluchées\n")})
+      output$legende3<-renderText(if(input$doc_type!=4){str_c(as.character(sum(data[["tableau"]]$count))," résultats trouvés")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(data[["tableau_page"]]$count))," pages correspondant à la recherche")}else if(input$doc_type==4 & input$occurrences_page==FALSE){str_c(as.character(sum(data[["tableau_volume"]]$count))," résultats trouvés")})
     })
   
   output$downloadData <- downloadHandler(
@@ -540,8 +538,8 @@ shinyServer(function(input, output,session){
     
     output$plot <- renderPlotly({Plot(df,input)})
     
-    output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base))," numéros épluchés\n"))
-    output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," résultats trouvés"))
+    output$legende2<-renderText(if(input$doc_type!=4){str_c(as.character(sum(df[["tableau"]]$base))," documents épluchés\n")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(df[["tableau_page"]]$base))," pages épluchées\n")}else if(input$doc_type==4 & input$occurrences_page==FALSE){str_c(as.character(sum(df[["tableau_volume"]]$base))," documents épluchées\n")})
+    output$legende3<-renderText(if(input$doc_type!=4){str_c(as.character(sum(df[["tableau"]]$count))," résultats trouvés")}else if(input$doc_type==4 & input$occurrences_page==TRUE){str_c(as.character(sum(df[["tableau_page"]]$count))," pages correspondant à la recherche")}else if(input$doc_type==4 & input$occurrences_page==FALSE){str_c(as.character(sum(df[["tableau_volume"]]$count))," résultats trouvés")})
     if(str_detect(input$mot,".+&.+"))
     {output$corr<-renderTable(correlation_matrix(prepare_correlation(df),"corr1"),rownames = TRUE)}
     else{output$corr<-renderTable(as.matrix(NA),colnames = FALSE)}
