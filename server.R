@@ -58,7 +58,7 @@ Plot <- function(data,input){
     tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")
     y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
     x <- list(title = data[["resolution"]],titlefont = 41)
-    if(input$search_mode==2 &input$doc_type==2){
+    if(input$doc_type==5){
       tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio*100,digits = 5),"%")
       y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
       }
@@ -180,7 +180,7 @@ get_corpus_perso <- function(mot,from,to,resolution,tot_df){
   return(data)
 }
 
-get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
+get_data <- function(mot,from,to,resolution,doc_type,titres){
   mots = str_split(mot,"&")[[1]]
   tableau<-as.data.frame(matrix(nrow=0,ncol=5),stringsAsFactors = FALSE)
   progress <- shiny::Progress$new()
@@ -190,7 +190,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
     base=read.csv("base_presse_annees.csv")
   } else  if(doc_type==1 & resolution=="Mois"){
     base=read.csv("base_presse_mois.csv")
-  } else if(doc_type==2 & search_mode==1){
+  } else if(doc_type==2){
     base=read.csv("base_livres_annees.csv")
   }
   
@@ -232,13 +232,13 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
       end_of_month = c(31,28,31,30,31,30,31,31,30,31,30,31)
       if(i%%4==0){end_of_month[2]=29} #Ne pas oublier les années bisextiles (merci Maxendre de m'y avoir fait penser)
       y<-as.character(i)
-      if(resolution=="Année" | (doc_type==2 & search_mode==1)){beginning = str_c(y,"/01/01")
+      if(resolution=="Année" | (doc_type==2)){beginning = str_c(y,"/01/01")
       end = str_c(y,"/12/31")}
       I = 1
       if(resolution=="Mois"){I=1:12} #Pour faire ensuite une boucle sur les mois
       
       
-      if(doc_type !=2){
+      if(doc_type !=2 & doc_type !=5){
         for(j in I){
           if(resolution=="Mois"){
             z = as.character(j)
@@ -269,7 +269,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
           progress$inc(1/((to-from+1)*length(I)*length(mots)), detail = paste("Gallicagram ratisse l'an", i))
         }}
       
-      if(doc_type==2 & search_mode==1){
+      if(doc_type==2){
         url<-str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.language%20all%20%22fre%22)%20and%20(text%20adj%20%22",mot1,"%22%20",or,")%20%20and%20(dc.type%20all%20%22monographie%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",y,"%22%20and%20gallicapublication_date%3C=%22",y,"%22)&suggest=10&keywords=",mot1,or_end)
         ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
         a<-str_extract(str_extract(ngram,"numberOfRecords>[:digit:]+"),"[:digit:]+")
@@ -295,7 +295,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   tableau$ratio<-tableau$count/tableau$base
   tableau$ratio[is.na(tableau$ratio)]<-0
   #ngram_viewer
-  if(doc_type==2 & search_mode==2){
+  if(doc_type==5){
   tableau=ngrami(mots,corpus = "fre_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)
   tableau$search_mode<-"match"
   colnames(tableau)=c("date","mot","ratio","corpus","search_mode")
@@ -313,9 +313,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres,search_mode){
   tableau.date = as.Date(as.character(tableau$date),format=format)
   if(doc_type==1){tableau$corpus="presse_gallica"
   tableau$search_mode<-"volume"}
-  if(doc_type==2 & search_mode==1){tableau$corpus="livres_gallica"
+  if(doc_type==2){tableau$corpus="livres_gallica"
   tableau$search_mode<-"volume"}
-  if(doc_type==2 & search_mode==2){tableau$corpus="livres_ngram"}
+  if(doc_type==5){tableau$corpus="livres_ngram"}
   if(doc_type==3){tableau$corpus="titre_presse_gallica"
   tableau$search_mode<-"volume"}
   if(doc_type==4){tableau$corpus="perso_gallica"
@@ -456,7 +456,7 @@ shinyServer(function(input, output,session){
   memoire<<-read.csv("exemple.csv",encoding="UTF-8")
   memoire$date<<-as.character(memoire$date)
   recherche_precedente<<-"Joffre&Pétain&Foch_1914_1920_Année"
-  corpus_precedent<<-"1_1_FALSE"
+  corpus_precedent<<-"1_FALSE"
   
   output$instructions <- renderUI(HTML('<ul><li>Séparer les termes par un "&" pour une recherche multiple</li><li>Utiliser "a+b" pour rechercher a OU b</li><li>Cliquer sur un point du graphique pour accéder aux documents dans Gallica</li></ul>'))
   
@@ -488,17 +488,17 @@ shinyServer(function(input, output,session){
       output$legende1<-renderText(paste(titres()))
     }
       
-      if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2){"Corpus : livres\n"}))}
+      if(input$doc_type!=3){output$legende1<-renderText(str_c(if(input$doc_type==1){"Corpus : presse\n"} else if (input$doc_type==2 | input$doc_type==5){"Corpus : livres\n"}))}
     })
   
   output$plot <- renderPlotly({Plot(data,input)})
   output$corr<-renderTable(correlation_matrix(prepare_correlation(data),"corr1"),rownames = TRUE)
   output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
-  observeEvent(input$search_mode,{observeEvent(input$doc_type,{
-    if(input$search_mode==2 & input$doc_type==2)
+  observeEvent(input$doc_type,{
+    if(input$doc_type==5)
     {output$legende=renderText("Source : books.google.com/ngrams")}
     else{output$legende=renderText("Source : gallica.bnf.fr")}
-  })})
+  })
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   observeEvent(
     input$occurrences_page,{
@@ -532,7 +532,7 @@ shinyServer(function(input, output,session){
     # datasetInput <- reactive({
     #   data$tableau})
     if (input$doc_type!=4){
-      df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres,input$search_mode)}
+      df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)}
     else if(input$doc_type==4){
       inFile<-input$target_upload
       tot_df<- read.csv(inFile$datapath, header = TRUE,sep = ";",encoding = "UTF-8")
@@ -555,7 +555,7 @@ shinyServer(function(input, output,session){
     {output$corr<-renderTable(correlation_matrix(prepare_correlation(df),"corr1"),rownames = TRUE)}
     else{output$corr<-renderTable(as.matrix(NA),colnames = FALSE)}
     
-    if(recherche_precedente==str_c(input$mot,"_",input$beginning,"_",input$end,"_",input$resolution)&corpus_precedent!=str_c(input$doc_type,"_",input$search_mode,"_",input$occurrences_page)){
+    if(recherche_precedente==str_c(input$mot,"_",input$beginning,"_",input$end,"_",input$resolution)&corpus_precedent!=str_c(input$doc_type,"_",input$occurrences_page)){
     matrice2<-prepare_memoire(input$beginning,input$end,input$resolution)
     j=length(matrice2)
     for (i in j:1) {
@@ -581,7 +581,7 @@ shinyServer(function(input, output,session){
     }
     else{output$corr2<-renderTable(as.matrix(NA),colnames = FALSE)}
     recherche_precedente<<-str_c(input$mot,"_",input$beginning,"_",input$end,"_",input$resolution)
-    corpus_precedent<<-str_c(input$doc_type,"_",input$search_mode,"_",input$occurrences_page)
+    corpus_precedent<<-str_c(input$doc_type,"_",input$occurrences_page)
 
     output$downloadData <- downloadHandler(
       filename = function() {
