@@ -711,12 +711,11 @@ shinyServer(function(input, output,session){
       if(input$corpus_structure_l==1 & input$corpus_ngram_l==FALSE){
         table<-read.csv("base_livres_annees.csv",encoding="UTF-8")
         somme<-sum(table$base)
-        table<-table[table$date>=1450,]
         table$hovers = str_c(table$date,": N = ",table$base)
         plot2<-plot_ly(table, x=~date,y=~base,text=~hovers,type='bar',hoverinfo="text")
         Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=false&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres en français océrisés\ndans Gallica<b> </a>")
         y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
-        x <- list(title = "Date",titlefont = 41)
+        x <- list(title = "Date",titlefont = 41,range=c("1500","2021"))
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
@@ -726,7 +725,7 @@ shinyServer(function(input, output,session){
         plot2<-plot_ly(ngram, x=~year,y=~volume_count,type='bar')
         Title = paste("<b>Répartition des ",total_volume_count," livres océrisés et en français\nexploités dans"," <a href = 'https://books.google.com/ngrams/graph?content=Joffre%2CP%C3%A9tain%2CFoch&year_start=1914&year_end=1920&corpus=30&smoothing=0&direct_url=t1%3B%2CJoffre%3B%2Cc0%3B.t1%3B%2CP%C3%A9tain%3B%2Cc0%3B.t1%3B%2CFoch%3B%2Cc0'>Google Ngram Viewer</a><b>")
         y <- list(title = "Nombre de livres exploités dans Ngram Viewer",titlefont = 41)
-        x <- list(title = "Date",titlefont = 41)
+        x <- list(title = "Date",titlefont = 41,range=c("1500","2021"))
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
@@ -806,22 +805,29 @@ shinyServer(function(input, output,session){
       if(input$corpus_structure_l==1 & input$corpus_ngram_l==FALSE){
         table<-read.csv("base_livres_annees.csv",encoding="UTF-8")
         somme<-sum(table$base)
-        table<-table[table$date>=1450,]
-        table$hovers = str_c(table$date,": N = ",table$base)
-        plot2<-plot_ly(table, x=~date,y=~base,text=~hovers,type='bar',hoverinfo="text")
-        Title = paste("<a href = 'https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&exactSearch=true&collapsing=false&version=1.2&query=(dc.language%20all%20%22fre%22)%20and%20(dc.type%20all%20%22monographie%22)%20and%20(gallicapublication_date%3E=%221380%22%20and%20gallicapublication_date%3C=%222021%22)%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20sortby%20dc.date/sort.ascending&suggest=10&keywords='> <b>Répartition des ",somme," livres en français océrisés\ndans Gallica<b> </a>")
-        y <- list(title = "Nombre de livres dans Gallica",titlefont = 41)
-        x <- list(title = "Date",titlefont = 41)
+        for (i in 2:length(table$base)) {
+          table$base[i]<-table$base[i]+table$base[i-1]
+        }
+        table$base=table$base/table$base[length(table$base)]
+        
+        plot2<-plot_ly(table, x=~date,y=~base,type='bar')
+        Title = paste("<b>Distribution chronologique du corpus de livres en français\nde Gallica<b>")
+        y <- list(title = "Proportion du corpus publié\navant la date indiquée en abscisse",titlefont = 41,tickformat=".1%")
+        x <- list(title = "Date",titlefont = 41,range=c("1500","2021"))
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
       else if(input$corpus_structure_l==1 & input$corpus_ngram_l==TRUE){
         ngram<-read.csv("ngram_viewer_fre_20200217.csv",encoding = "UTF-8")
         total_volume_count<-sum(ngram$volume_count)
+        for (i in 2:length(ngram$volume_count)) {
+          ngram$volume_count[i]<-ngram$volume_count[i]+ngram$volume_count[i-1]
+        }
+        ngram$volume_count=ngram$volume_count/ngram$volume_count[length(ngram$volume_count)]
         plot2<-plot_ly(ngram, x=~year,y=~volume_count,type='bar')
-        Title = paste("<b>Répartition des ",total_volume_count," livres océrisés et en français\nexploités dans"," <a href = 'https://books.google.com/ngrams/graph?content=Joffre%2CP%C3%A9tain%2CFoch&year_start=1914&year_end=1920&corpus=30&smoothing=0&direct_url=t1%3B%2CJoffre%3B%2Cc0%3B.t1%3B%2CP%C3%A9tain%3B%2Cc0%3B.t1%3B%2CFoch%3B%2Cc0'>Google Ngram Viewer</a><b>")
-        y <- list(title = "Nombre de livres exploités dans Ngram Viewer",titlefont = 41)
-        x <- list(title = "Date",titlefont = 41)
+        Title = paste("<b>Distribution chronologique du corpus exploité\npar Google Ngram Viewer<b>")
+        y <- list(title = "Proportion du corpus publié\navant la date indiquée en abscisse",titlefont = 41,tickformat=".1%")
+        x <- list(title = "Date",titlefont = 41,range=c("1500","2021"))
         plot2 = layout(plot2, yaxis = y, xaxis = x,title = Title)
         return(plot2)
       }
