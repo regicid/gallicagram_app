@@ -907,7 +907,8 @@ shinyServer(function(input, output,session){
     
     
     if(input$doc_type==5){output$legende=renderText("Source : books.google.com/ngrams")}
-    if(input$doc_type!=5){output$legende=renderText("Source : gallica.bnf.fr")}
+    if(input$doc_type==6 | input$doc_type==7){output$legende=renderText("Source : europeana.eu")}
+    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4){output$legende=renderText("Source : gallica.bnf.fr")}
     
     if(input$doc_type==1){output$legende1<-renderText("Corpus : presse")}
     if(input$doc_type==2 | input$doc_type==5){output$legende1<-renderText("Corpus : livres")}
