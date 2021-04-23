@@ -885,7 +885,7 @@ shinyServer(function(input, output,session){
     
     output$plot <- renderPlotly({Plot(df,input)})
     
-    if(input$doc_type==1 | (input$doc_type==2 & input$search_mode==1) | (input$doc_type==3 & input$search_mode==1)){
+    if(input$doc_type==1 | (input$doc_type==2 & input$search_mode==1) | (input$doc_type==3 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7){
       nb_mots<-length(unique(df[["tableau"]]$mot))
       output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base)/nb_mots)," documents épluchés"))
       output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," résultats trouvés"))
