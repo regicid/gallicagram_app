@@ -491,9 +491,13 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
         or1<-NA
         or1_end<-NA
         for (j in 2:length(mots_or)) {
+          if(doc_type==1 | doc_type==2 | doc_type==3 |doc_type==4)
+          {or1[j]<-str_c("or%20text%20adj%20%22",mots_or[j],"%22%20")
+          or1_end[j]<-str_c("%20",mots_or[j])}
+          if(doc_type==6 | doc_type==7)
+          {or1[j]<-str_c("OR%22",mots_or[j],"%22")
+          or1_end[j]<-str_c("%20",mots_or[j])}
           
-          or1[j]<-str_c("or%20text%20adj%20%22",mots_or[j],"%22%20")
-          or1_end[j]<-str_c("%20",mots_or[j])
           or<-str_c(or,or1[j])
           or_end<-str_c(or_end,or1_end[j])
         }
@@ -535,11 +539,11 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           if(doc_type == 6){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
             langue="de"
-            url<-str_c("https://newspapers.eanadev.org/api/v2/search.json?query=%22",mot1,"%22&rows=1&profile=hits&wskey=%20athrobid&qf=proxy_dcterms_issued:%5B",beginning,"+TO+",end,"%5D&qf=LANGUAGE:de")}
+            url<-str_c("https://newspapers.eanadev.org/api/v2/search.json?query=%22",mot1,"%22",or,"&rows=1&profile=hits&wskey=%20athrobid&qf=proxy_dcterms_issued:%5B",beginning,"+TO+",end,"%5D&qf=LANGUAGE:de")}
           if(doc_type == 7){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
             langue="nl"
-            url<-str_c("https://newspapers.eanadev.org/api/v2/search.json?query=%22",mot1,"%22&rows=1&profile=hits&wskey=%20athrobid&qf=proxy_dcterms_issued:%5B",beginning,"+TO+",end,"%5D&qf=LANGUAGE:nl")}
+            url<-str_c("https://newspapers.eanadev.org/api/v2/search.json?query=%22",mot1,"%22",or,"&rows=1&profile=hits&wskey=%20athrobid&qf=proxy_dcterms_issued:%5B",beginning,"+TO+",end,"%5D&qf=LANGUAGE:nl")}
           
           
           if(doc_type == 1 | doc_type == 3){ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
@@ -549,7 +553,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram<-as.character(read_html(RETRY("GET",url,times = 6)))
             ngram<-str_replace_all(ngram,"[:punct:]","")
             a<-str_extract(str_extract(ngram,"totalResults[:digit:]+"),"[:digit:]+")
-            url<-str_c("https://classic.europeana.eu/portal/fr/collections/newspapers?q=%22",mot1,"%22&f%5BMEDIA%5D%5B%5D=true&f%5BTYPE%5D%5B%5D=TEXT&f%5BLANGUAGE%5D%5B%5D=",langue,"&f%5Bapi%5D%5B%5D=collection&range%5Bproxy_dcterms_issued%5D%5Bbegin%5D=",beginning,"&range%5Bproxy_dcterms_issued%5D%5Bend%5D=",end)}
+            url<-str_c("https://classic.europeana.eu/portal/fr/collections/newspapers?q=%22",mot1,"%22",or,"&f%5BMEDIA%5D%5B%5D=true&f%5BTYPE%5D%5B%5D=TEXT&f%5BLANGUAGE%5D%5B%5D=",langue,"&f%5Bapi%5D%5B%5D=collection&range%5Bproxy_dcterms_issued%5D%5Bbegin%5D=",beginning,"&range%5Bproxy_dcterms_issued%5D%5Bend%5D=",end)}
           if(doc_type == 3){
             url_base <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.relation%20any%20%22",ark1,"%22",ark3,")%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date")
             ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
