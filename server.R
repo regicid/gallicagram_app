@@ -497,7 +497,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   }
   
   if(doc_type==13 | doc_type==14){
-    rD <- rsDriver(browser="firefox", port=netstat::free_port(), verbose=F)
+    rD <- rsDriver(browser="firefox", port=free_port(), verbose=F)
     remDr <- rD[["client"]]
   }
   
