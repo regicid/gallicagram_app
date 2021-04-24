@@ -12,7 +12,8 @@ library(ngramr)
 library(dplyr)
 library(htmltools)
 library(purrr)
-
+library(rvest)
+library(RSelenium)
 
 
 
@@ -61,7 +62,7 @@ Plot <- function(data,input){
     tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")
     y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
     x <- list(title = data[["resolution"]],titlefont = 41)
-    if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10){
+    if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){
       tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio*100,digits = 5),"%")
       y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
       }
@@ -481,8 +482,24 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
     base=read.csv("base_presse_annees_bna_en.csv")
   }else  if(doc_type==8 & resolution=="Mois"){
     base=read.csv("base_presse_mois_bna_en.csv")
+  }else  if(doc_type==11 & resolution=="Année"){
+    base=read.csv("base_presse_annees_bne_es.csv")
+  }else  if(doc_type==11 & resolution=="Mois"){
+    base=read.csv("base_presse_mois_bne_es.csv")
+  }else  if(doc_type==13 & resolution=="Année"){
+    base=read.csv("base_presse_annees_kbr_fr.csv")
+  }else  if(doc_type==13 & resolution=="Mois"){
+    base=read.csv("base_presse_mois_kbr_fr.csv")
+  }else  if(doc_type==14 & resolution=="Année"){
+    base=read.csv("base_presse_annees_kbr_nl.csv")
+  }else  if(doc_type==14 & resolution=="Mois"){
+    base=read.csv("base_presse_mois_kbr_nl.csv")
   }
   
+  if(doc_type==13 | doc_type==14){
+    rD <- rsDriver(browser="firefox", port=4547L, verbose=F)
+    remDr <- rD[["client"]]
+  }
   
   for (i in from:to){
     for(mot in mots){
@@ -501,6 +518,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           if(doc_type==6 | doc_type==7 | doc_type==8)
           {or1[j]<-str_c("OR%22",mots_or[j],"%22")
           or1_end[j]<-str_c("%20",mots_or[j])}
+          if(doc_type==11)
+          {or1[j]<-str_c("&o=or")
+          or1_end[j]<-str_c("&w=%22",mots_or[j],"%22")}
           
           or<-str_c(or,or1[j])
           or_end<-str_c(or_end,or1_end[j])
@@ -532,7 +552,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
       if(resolution=="Mois"){I=1:12} #Pour faire ensuite une boucle sur les mois
       
       
-      if(doc_type !=2 & doc_type !=5 & doc_type !=9 & doc_type !=10){
+      if(doc_type !=2 & doc_type !=5 & doc_type !=9 & doc_type !=10 & doc_type !=12){
         for(j in I){
           if(resolution=="Mois"){
             z = as.character(j)
@@ -552,6 +572,38 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           if(doc_type == 8){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
             url<-str_c("https://www.britishnewspaperarchive.co.uk/search/results/",beginning,"/",end,"?basicsearch=%22",mot1,"%22",or,"&exactsearch=true&retrievecountrycounts=false")}
+          if(doc_type == 11){
+            if(resolution=="Mois"){
+              z = as.character(j)
+              if(nchar(z)<2){z<-str_c("0",z)}
+              beginning = str_c(y,"-",z,"-01")
+              end = str_c(y,"-",z,"-",end_of_month[j])
+              url<-str_c("http://hemerotecadigital.bne.es/results.vm?o=",or,"&w=%22",mot1,"%22",or_end,"&f=text&d=creation&d=",y,"&d=",z,"&d=01&d=",y,"&d=",z,"&d=",end_of_month[j],"&t=%2Bcreation&l=700&s=0&view=&lang=fr")
+            }
+            if(resolution=="Année"){
+              url<-str_c("http://hemerotecadigital.bne.es/results.vm?o=",or,"&w=%22",mot1,"%22",or_end,"&f=text&d=creation&d=",y,"&d=01&d=01&d=",y,"&d=12&d=31&t=%2Bcreation&l=700&s=0&view=&lang=fr")
+            }
+          }
+          if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
+            end<-str_replace_all(end,"/","-")
+            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=fr&per=&lang=FR&per_type=1")
+            remDr$navigate(url)
+            Sys.sleep(2) # give the page time to fully load
+            ngram <- remDr$getPageSource()[[1]]
+            ngram<-str_extract(ngram,"foundnumber.+")
+            ngram<-str_remove_all(ngram,"[:punct:]")
+            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
+          }
+          if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
+            end<-str_replace_all(end,"/","-")
+            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=nl&per=&lang=FR&per_type=1")
+            remDr$navigate(url)
+            Sys.sleep(2) # give the page time to fully load
+            ngram <- remDr$getPageSource()[[1]]
+            ngram<-str_extract(ngram,"foundnumber.+")
+            ngram<-str_remove_all(ngram,"[:punct:]")
+            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
+          }
           
           
           if(doc_type == 1 | doc_type == 3){ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
@@ -573,16 +625,25 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram<-str_remove_all(ngram,">")
             a<-sum(as.integer(ngram))
           }
+          if(doc_type == 11){
+            ngram<-as.character(read_html(RETRY("GET",url,times = 6)))
+            ngram<-str_remove_all(ngram,"[:punct:]")
+            ngram<-str_remove_all(ngram,"[:space:]")
+            ngram<-str_remove_all(ngram,"<strong>")
+            a<-str_extract(str_extract(ngram,"Results[:digit:]+"),"[:digit:]+")
+            if (is.na(a)){a<-str_extract(str_extract(ngram,"Résultats[:digit:]+"),"[:digit:]+")}
+          }
+          
         
           if(doc_type == 3){
             url_base <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.relation%20any%20%22",ark1,"%22",ark3,")%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date")
             ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
             b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
           }
-          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8)){
+          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11)){
             date=str_c(y,"/",z)
             b<-as.integer(base$base[base$date==date])}
-          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8)){b<-as.integer(base$base[base$date==y])}
+          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11)){b<-as.integer(base$base[base$date==y])}
           if(length(b)==0L){b=0}
           tableau[nrow(tableau)+1,] = NA
           date=y
@@ -610,49 +671,46 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   tableau$url = str_replace(tableau$url,"SRU","services/engine/search/sru")
   tableau$url = str_replace(tableau$url,"maximumRecords=1","maximumRecords=25")
   
-  
+  if(doc_type==13 | doc_type==14){
+    remDr$close()
+    rD$server$stop()
+  }
   
   tableau$count<-as.integer(tableau$count)
   tableau$base<-as.integer(tableau$base)
   tableau$ratio<-tableau$count/tableau$base
   tableau$ratio[is.na(tableau$ratio)]<-0
   #ngram_viewer
-  if(doc_type==5){
-  tableau=ngrami(mots,corpus = "fre_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)
-  tableau$search_mode<-"match"
-  colnames(tableau)=c("date","mot","ratio","corpus","search_mode")
-  tableau$base<-0
-  tableau$date<-as.character(tableau$date)
-  tableau$count<-0
-  tableau$url<-""
-  for (i in 1:length(tableau$date)) {
-    tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_fr") 
-  }
-  }
-  if(doc_type==9){
-    tableau=ngrami(mots,corpus = "ger_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)
+  
+  if(doc_type==5 | doc_type==9 | doc_type==10 | doc_type==12){
+    if(doc_type==5){tableau=ngrami(mots,corpus = "fre_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)}
+    if(doc_type==9){tableau=ngrami(mots,corpus = "ger_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)}
+    if(doc_type==10){tableau=ngrami(mots,corpus = "eng_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)}
+    if(doc_type==12){tableau=ngrami(mots,corpus = "spa_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)}
     tableau$search_mode<-"match"
     colnames(tableau)=c("date","mot","ratio","corpus","search_mode")
     tableau$base<-0
     tableau$date<-as.character(tableau$date)
     tableau$count<-0
     tableau$url<-""
-    for (i in 1:length(tableau$date)) {
-      tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_de") 
-    }
+    if(doc_type==5){
+      for (i in 1:length(tableau$date)) {
+        tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_fr") 
+      }}
+    if(doc_type==9){
+      for (i in 1:length(tableau$date)) {
+        tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_de") 
+      }}
+    if(doc_type==10){
+      for (i in 1:length(tableau$date)) {
+        tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_en") 
+      }}
+    if(doc_type==12){
+      for (i in 1:length(tableau$date)) {
+        tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_es") 
+      }}
   }
-  if(doc_type==10){
-    tableau=ngrami(mots,corpus = "eng_2019",year_start = from, year_end = to, smoothing = 0, aggregate = TRUE)
-    tableau$search_mode<-"match"
-    colnames(tableau)=c("date","mot","ratio","corpus","search_mode")
-    tableau$base<-0
-    tableau$date<-as.character(tableau$date)
-    tableau$count<-0
-    tableau$url<-""
-    for (i in 1:length(tableau$date)) {
-      tableau$url[i]=str_c("https://www.google.com/search?q=%22",tableau$mot[i],"%22&tbm=bks&tbs=cdr:1,cd_min:",tableau$date[i],",cd_max:",tableau$date[i],"&lr=lang_en") 
-    }
-  }
+  
   tableau$resolution<-resolution
   format = "%Y"
   if(resolution=="Mois"){format=paste(format,"%m",sep="/")}
@@ -674,6 +732,14 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   tableau$search_mode<-"volume"}
   if(doc_type==9){tableau$corpus="livres_de_ngram"}
   if(doc_type==10){tableau$corpus="livres_en_ngram"}
+  if(doc_type==11){tableau$corpus="presse_es_bne"
+  tableau$search_mode<-"page"}
+  if(doc_type==12){tableau$corpus="livres_es_ngram"}
+  if(doc_type==13){tableau$corpus="presse_fr_kbr"
+  tableau$search_mode<-"page"}
+  if(doc_type==14){tableau$corpus="presse_nl_kbr"
+  tableau$search_mode<-"page"}
+  
   memoire<<-bind_rows(tableau,memoire)
   data = list(tableau,paste(mots,collapse="&"),resolution)
   names(data) = c("tableau","mot","resolution")
@@ -813,7 +879,7 @@ shinyServer(function(input, output,session){
   corpus_precedent<<-"1_1"
   
   
-  output$instructions <- renderUI(HTML('<ul><li>Séparer les termes par un "&" pour une recherche multiple</li><li>Utiliser "a+b" pour rechercher a OU b</li><li>Cliquer sur un point du graphique pour accéder aux documents dans Gallica</li></ul>'))
+  output$instructions <- renderUI(HTML('<ul><li>Séparer les termes par un "&" pour une recherche multiple</li><li>Utiliser "a+b" pour rechercher a OU b</li><li>Cliquer sur un point du graphique pour accéder aux documents dans la bibliothèque numérique correspondante</li></ul>'))
   
   indicator_file <- reactive({
     if(is.null(input$target_upload)) {return(0)}
@@ -854,41 +920,51 @@ shinyServer(function(input, output,session){
   
   observeEvent(input$language,{
     if(input$language == 1){
-      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5),selected = 1)
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5, "Presse / KBR"=13),selected = 1)
     }
     else if(input$language == 2){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse allemande / Europeana" = 6, "Livres / Ngram Viewer Allemand" = 9),selected = 6)
     }else if(input$language == 3){
-      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse néerlandaise / Europeana" = 7),selected = 7)
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse néerlandaise / Europeana" = 7,"Presse néerlandaise / KBR"=14),selected = 7)
     }else if(input$language == 4){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse britannique / BNA" = 8, "Livres / Ngram Viewer Anglais" = 10),selected = 8)
+    }else if(input$language == 5){
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse espagnole / BNE"=11, "Livres / Ngram Viewer Espagnol"=12),selected = 11)
     }
   })
   
   
   observeEvent(input$doc_type,{
-      if(input$doc_type == 2){
+    if(input$doc_type == 2){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1,"Par page" = 2),selected = 1)
       updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
-      }
+    }
     if(input$doc_type == 4 | input$doc_type == 3){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1,"Par page" = 2),selected = 1)
       updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
     }
-      if(input$doc_type == 1 | input$doc_type == 6 | input$doc_type == 7 | input$doc_type == 8){
-        updateSelectInput(session,"search_mode",choices = list("Par document" = 1),selected = 1)
-        updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
-      }
-    if(input$doc_type == 5 | input$doc_type == 9 | input$doc_type == 10){
+    if(input$doc_type == 1 | input$doc_type == 6 | input$doc_type == 7 | input$doc_type == 8){
+      updateSelectInput(session,"search_mode",choices = list("Par document" = 1),selected = 1)
+      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
+    }
+    if(input$doc_type == 5 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 12){
       updateSelectInput(session,"search_mode",choices = list("Par n-gramme" = 3),selected = 3)
       updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
+    }
+    if(input$doc_type == 11){
+      updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
+      updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
+    }
+    if(input$doc_type == 13 | input$doc_type == 14){
+      updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
+      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
     }
     })
   
   
   observeEvent(
     input$search_mode,{
-      if(input$search_mode==2){
+      if(input$search_mode==2 & input$doc_type != 11){
         output$avertissement<-renderText(message(recherche_texte(),recherche_from(),recherche_to(),recherche_doc_type(),recherche_titres()))
     }
     })
@@ -918,7 +994,7 @@ shinyServer(function(input, output,session){
   observeEvent(input$do,{
     # datasetInput <- reactive({
     #   data$tableau})
-    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 ){
+    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 11 | input$doc_type == 12 ){
       df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)}
     else if(input$doc_type==4){
       inFile<-input$target_upload
@@ -951,9 +1027,14 @@ shinyServer(function(input, output,session){
       output$legende2<-renderText(str_c(as.character(sum(df[["tableau_volume"]]$base)/nb_mots)," documents épluchées"))
       output$legende3<-renderText(str_c(as.character(sum(df[["tableau_volume"]]$count))," résultats trouvés"))
     }
-    else if (input$doc_type==5 | input$doc_type==9 | input$doc_type==10){
+    else if (input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){
       output$legende2<-NULL
       output$legende3<-NULL
+    }
+    else if (input$doc_type==11 | input$doc_type==13 | input$doc_type==14) {
+      nb_mots<-length(unique(df[["tableau"]]$mot))
+      output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base)/nb_mots)," pages épluchées"))
+      output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," pages correspondant à la recherche"))
     }
     else {
       nb_mots<-length(unique(df[["tableau_page"]]$mot))
@@ -962,13 +1043,21 @@ shinyServer(function(input, output,session){
     }
     
     
-    if(input$doc_type==5){output$legende=renderText("Source : books.google.com/ngrams")}
+    if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende=renderText("Source : books.google.com/ngrams")}
     if(input$doc_type==6 | input$doc_type==7){output$legende=renderText("Source : europeana.eu")}
     if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4){output$legende=renderText("Source : gallica.bnf.fr")}
     if(input$doc_type==8){output$legende=renderText("Source : britishnewspaperarchive.co.uk")}
+    if(input$doc_type==11){output$legende=renderText("Source : hemerotecadigital.bne.es")}
+    if(input$doc_type==13 | input$doc_type==14){output$legende=renderText("Source : belgicapress.be")}
     
-    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8){output$legende1<-renderText("Corpus : presse")}
-    if(input$doc_type==2 | input$doc_type==5){output$legende1<-renderText("Corpus : livres")}
+    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13){output$legende4=renderText("Langue : français")}
+    if(input$doc_type==6 | input$doc_type==9){output$legende4=renderText("Langue : allemand")}
+    if(input$doc_type==7 | input$doc_type==14){output$legende4=renderText("Langue : néerlandais")}
+    if(input$doc_type==8 | input$doc_type==10){output$legende4=renderText("Langue : anglais")}
+    if(input$doc_type==11 | input$doc_type==12){output$legende4=renderText("Langue : espagnol")}
+    
+    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type==11 | input$doc_type==13 | input$doc_type==14){output$legende1<-renderText("Corpus : presse")}
+    if(input$doc_type==2 | input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende1<-renderText("Corpus : livres")}
     if(input$doc_type==4){output$legende1<-renderText("Corpus : personnalisé")}
     if(input$doc_type==3){
       liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")

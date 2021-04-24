@@ -1,10 +1,16 @@
 library(stringr)
 library(xml2)
-library(httr)
-from="1699"
-to="2021"
+library(rvest)
+library(RSelenium)
+
+rD <- rsDriver(browser="firefox", port=4546L, verbose=F)
+remDr <- rD[["client"]]
+
+from="1814"
+to="1970"
 resolution="Année"
 tableau<-as.data.frame(matrix(nrow=0,ncol=2),stringsAsFactors = FALSE)
+
 
 
 for (i in from:to){
@@ -25,16 +31,15 @@ for (i in from:to){
       if(nchar(z)<2){z<-str_c("0",z)}
       beginning = str_c(y,"-",z,"-01")
       end = str_c(y,"-",z,"-",end_of_month[j])}
-    url_base<-str_c("https://www.britishnewspaperarchive.co.uk/search/results/",beginning,"/",end,"?exactsearch=true&retrievecountrycounts=false&sortorder=dayearly")
-    ngram_base<-as.character(read_html(RETRY("GET",url_base,times = 6)))
-    ngram_base<-str_remove_all(ngram_base,"[:space:]")
-    ngram_base<-str_extract(ngram_base,"Date--.+Newspapers--")
-    ngram_base<-str_extract(ngram_base,'list-group-item"title.+')
-    ngram_base<-str_remove_all(ngram_base,",")
-    ngram_base<-str_c(unlist(str_extract_all(ngram_base,">[:digit:]+<")))
-    ngram_base<-str_remove_all(ngram_base,"<")
-    ngram_base<-str_remove_all(ngram_base,">")
-    b<-sum(as.integer(ngram_base))
+    url_base<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=fr&per=&lang=FR&per_type=1")
+
+    remDr$navigate(url_base)
+    
+    Sys.sleep(2) # give the page time to fully load
+    ngram_base <- remDr$getPageSource()[[1]]
+    ngram_base<-str_extract(ngram_base,"foundnumber.+")
+    ngram_base<-str_remove_all(ngram_base,"[:punct:]")
+    b<-as.integer(str_extract_all(ngram_base,"[:digit:]+"))
     tableau[nrow(tableau)+1,] = NA
     date=y
     if(resolution=="Mois"){date = paste(y,z,sep="-")}
@@ -44,9 +49,10 @@ for (i in from:to){
   
   
 }
+remDr$close()
+rD$server$stop()
 
 colnames(tableau)<-c("date","base")
-tableau$date<-str_replace_all(tableau$date,"-","/")
 tableau$base[is.na(tableau$base)]<-0
 tableau$base<-as.integer(tableau$base)
-write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_annees_bna_en.csv',fileEncoding = "UTF-8",row.names = FALSE)  
+write.csv(tableau,'C:/Users/Benjamin/gallicagram_app/base_presse_annees_kbr_fr.csv',fileEncoding = "UTF-8",row.names = FALSE)  
