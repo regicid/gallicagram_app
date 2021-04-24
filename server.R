@@ -497,6 +497,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   }
   
   if(doc_type==13 | doc_type==14){
+    remDr$close()
+    rD$server$stop()
     rD <- rsDriver(browser="firefox", port=4547L, verbose=F)
     remDr <- rD[["client"]]
   }
