@@ -14,7 +14,7 @@ library(htmltools)
 library(purrr)
 library(rvest)
 library(RSelenium)
-
+library(netstat)
 
 
 
@@ -497,9 +497,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   }
   
   if(doc_type==13 | doc_type==14){
-    kill = 'for /f "tokens=5" %a in (\'netstat -aon ^| find ":4444" ^| find "LISTENING"\') do taskkill /f /pid %a'
-    shell(kill, ignore.stderr = TRUE, ignore.stdout = TRUE)
-    rD <- rsDriver(browser="firefox", port=4444L, verbose=F)
+    rD <- rsDriver(browser="firefox", port=netstat::free_port(), verbose=F)
     remDr <- rD[["client"]]
   }
   
@@ -674,8 +672,6 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
     rD$server$stop()
     rm(rD)
     gc()
-    kill = 'for /f "tokens=5" %a in (\'netstat -aon ^| find ":4444" ^| find "LISTENING"\') do taskkill /f /pid %a'
-    shell(kill, ignore.stderr = TRUE, ignore.stdout = TRUE)
   }
   
   tableau$count<-as.integer(tableau$count)
