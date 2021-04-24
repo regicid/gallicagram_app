@@ -14,7 +14,6 @@ library(htmltools)
 library(purrr)
 library(rvest)
 library(RSelenium)
-library(netstat)
 
 
 
