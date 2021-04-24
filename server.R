@@ -14,7 +14,6 @@ library(htmltools)
 library(purrr)
 library(rvest)
 library(RSelenium)
-library(netstat)
 
 
 
@@ -26,6 +25,8 @@ var url = point.data.customdata[point.pointIndex];
 window.open(url);
 });
 }"
+
+se="linux"
 
 Plot <- function(data,input){
 
@@ -497,7 +498,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   }
   
   if(doc_type==13 | doc_type==14){
-    rD <- rsDriver(browser="firefox", port=free_port(), verbose=F)
+    if(se=="windows"){system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)}
+    if(se=="linux"){system("kill -9 $(lsof -t -i:4444)", intern=FALSE, ignore.stdout=FALSE)}
+    rD <- rsDriver(browser="firefox", port=4444L, verbose=F)
     remDr <- rD[["client"]]
   }
   
@@ -586,11 +589,11 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           }
           if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
-            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=fr&per=&lang=FR&per_type=1")
+            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=",mot1,"&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=fr&per=&lang=FR&per_type=1")
           }
-          if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
+          if(doc_type == 14){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
-            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=nl&per=&lang=FR&per_type=1")
+            url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=",mot1,"&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=nl&per=&lang=FR&per_type=1")
           }
           
           
@@ -627,7 +630,7 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram <- remDr$getPageSource()[[1]]
             ngram<-str_extract(ngram,"foundnumber.+")
             ngram<-str_remove_all(ngram,"[:punct:]")
-            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
+            a<-as.integer(str_extract(ngram,"[:digit:]+"))
           }
           
         
@@ -672,6 +675,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
     rD$server$stop()
     rm(rD)
     gc()
+    if(se=="windows"){system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)}
+    if(se=="linux"){system("kill -9 $(lsof -t -i:4444)", intern=FALSE, ignore.stdout=FALSE)}
   }
   
   tableau$count<-as.integer(tableau$count)
