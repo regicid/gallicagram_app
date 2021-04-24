@@ -14,6 +14,7 @@ library(htmltools)
 library(purrr)
 library(rvest)
 library(RSelenium)
+library(netstat)
 
 
 
@@ -497,7 +498,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   }
   
   if(doc_type==13 | doc_type==14){
-    rD <- rsDriver(browser="firefox", port=4547L, verbose=F)
+    kill = 'for /f "tokens=5" %a in (\'netstat -aon ^| find ":4444" ^| find "LISTENING"\') do taskkill /f /pid %a'
+    shell(kill, ignore.stderr = TRUE, ignore.stdout = TRUE)
+    rD <- rsDriver(browser="firefox", port=4444L, verbose=F)
     remDr <- rD[["client"]]
   }
   
@@ -587,22 +590,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
             url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=fr&per=&lang=FR&per_type=1")
-            remDr$navigate(url)
-            Sys.sleep(2) # give the page time to fully load
-            ngram <- remDr$getPageSource()[[1]]
-            ngram<-str_extract(ngram,"foundnumber.+")
-            ngram<-str_remove_all(ngram,"[:punct:]")
-            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
           }
           if(doc_type == 13){beginning<-str_replace_all(beginning,"/","-")
             end<-str_replace_all(end,"/","-")
             url<-str_c("https://www.belgicapress.be/pressshow.php?adv=1&all_q=&any_q=&exact_q=&none_q=&from_d=",beginning,"&to_d=",end,"&per_lang=nl&per=&lang=FR&per_type=1")
-            remDr$navigate(url)
-            Sys.sleep(2) # give the page time to fully load
-            ngram <- remDr$getPageSource()[[1]]
-            ngram<-str_extract(ngram,"foundnumber.+")
-            ngram<-str_remove_all(ngram,"[:punct:]")
-            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
           }
           
           
@@ -633,6 +624,14 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             a<-str_extract(str_extract(ngram,"Results[:digit:]+"),"[:digit:]+")
             if (is.na(a)){a<-str_extract(str_extract(ngram,"Résultats[:digit:]+"),"[:digit:]+")}
           }
+          if(doc_type == 13 | doc_type == 14){
+            remDr$navigate(url)
+            Sys.sleep(2) # give the page time to fully load
+            ngram <- remDr$getPageSource()[[1]]
+            ngram<-str_extract(ngram,"foundnumber.+")
+            ngram<-str_remove_all(ngram,"[:punct:]")
+            a<-as.integer(str_extract_all(ngram,"[:digit:]+"))
+          }
           
         
           if(doc_type == 3){
@@ -640,10 +639,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
             b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
           }
-          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11)){
+          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14)){
             date=str_c(y,"/",z)
             b<-as.integer(base$base[base$date==date])}
-          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11)){b<-as.integer(base$base[base$date==y])}
+          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14)){b<-as.integer(base$base[base$date==y])}
           if(length(b)==0L){b=0}
           tableau[nrow(tableau)+1,] = NA
           date=y
@@ -674,6 +673,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   if(doc_type==13 | doc_type==14){
     remDr$close()
     rD$server$stop()
+    rm(rD)
+    gc()
+    kill = 'for /f "tokens=5" %a in (\'netstat -aon ^| find ":4444" ^| find "LISTENING"\') do taskkill /f /pid %a'
+    shell(kill, ignore.stderr = TRUE, ignore.stdout = TRUE)
   }
   
   tableau$count<-as.integer(tableau$count)
