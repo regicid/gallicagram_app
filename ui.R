@@ -20,7 +20,7 @@ shinyUI(navbarPage("Gallicagram",
                             pageWithSidebar(headerPanel(''),
                                             sidebarPanel(
                                                 textInput("mot","Recherche","Joffre&Pétain&Foch"),
-                                                conditionalPanel(condition="input.doc_type != 4 && input.search_mode == 1 | input.search_mode == 3 | input.doc_type == 11 | input.doc_type == 13 | input.doc_type == 14",uiOutput("instructions")),
+                                                conditionalPanel(condition="input.doc_type != 4 && input.search_mode == 1 | input.search_mode == 3 | input.doc_type == 11 | input.doc_type == 13 | input.doc_type == 14 | input.doc_type == 15 | input.doc_type == 16",uiOutput("instructions")),
                                                 conditionalPanel(condition="input.doc_type == 4",p('Recherche limitée à un seul syntagme')),
                                                 conditionalPanel(condition="(input.doc_type == 2 || input.doc_type == 3) && input.search_mode ==2",p('Recherche limitée à un seul syntagme dans 5 000 documents au maximum')),
                                                 conditionalPanel(condition="((input.doc_type == 2 || input.doc_type == 3) && input.search_mode ==2) || input.doc_type == 4",textOutput("avertissement")),

@@ -613,10 +613,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
               if(nchar(z)<2){z<-str_c("0",z)}
               beginning = str_c(y,"-",z,"-01")
               end = str_c(y,"-",z,"-",end_of_month[j])
-              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=",z,"&dafyq=",y,"&datdq=",end_of_month[j],"&datmq=",z,"&datyq=",y,"&laq=fr&puq=&txf=txIN&ssnip=&ccq=&l=fr")
+              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=",z,"&dafyq=",y,"&datdq=",end_of_month[j],"&datmq=",z,"&datyq=",y,"&laq=fr&puq=&txf=txIN&ssnip=&ccq=&l=fr&tyq=ARTICLE")
             }
             if(resolution=="Année"){
-              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=01&dafyq=",y,"&datdq=31&datmq=12&datyq=",y,"&laq=fr&puq=&txf=txIN&ssnip=&ccq=&l=fr")
+              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=01&dafyq=",y,"&datdq=31&datmq=12&datyq=",y,"&laq=fr&puq=&txf=txIN&ssnip=&ccq=&l=fr&tyq=ARTICLE")
             }
           }
           if(doc_type == 16){
@@ -625,10 +625,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
               if(nchar(z)<2){z<-str_c("0",z)}
               beginning = str_c(y,"-",z,"-01")
               end = str_c(y,"-",z,"-",end_of_month[j])
-              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=",z,"&dafyq=",y,"&datdq=",end_of_month[j],"&datmq=",z,"&datyq=",y,"&laq=de&puq=&txf=txIN&ssnip=&ccq=&l=fr")
+              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=",z,"&dafyq=",y,"&datdq=",end_of_month[j],"&datmq=",z,"&datyq=",y,"&laq=de&puq=&txf=txIN&ssnip=&ccq=&l=fr&tyq=ARTICLE")
             }
             if(resolution=="Année"){
-              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=01&dafyq=",y,"&datdq=31&datmq=12&datyq=",y,"&laq=de&puq=&txf=txIN&ssnip=&ccq=&l=fr")
+              url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=01&dafyq=",y,"&datdq=31&datmq=12&datyq=",y,"&laq=de&puq=&txf=txIN&ssnip=&ccq=&l=fr&tyq=ARTICLE")
             }
           }
           
@@ -671,7 +671,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           if(doc_type == 15 | doc_type == 16){
             ngram<-as.character(read_html(RETRY("GET",url,times = 6)))
             ngram<-str_remove_all(ngram,",")
-            ngram<-str_extract(ngram,"ARTICLE</a><span.+")
+            ngram<-str_extract(ngram,"Résultats 1 - 20 de  .+")
+            ngram<-str_remove(ngram,"Résultats 1 - 20 de  ")
             a<-str_extract(ngram,"[:digit:]+")
           }
           
