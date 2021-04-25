@@ -541,6 +541,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           or_end<-str_c(or_end,or1_end[j])
         }
         mot1<-mots_or[1]}else{mot1=mot2}
+      if(doc_type==15 | doc_type==16){
+        mot1<-URLencode(mot1)
+        or<-URLencode(or)
+        }
       
       if(doc_type==3 & length(titres)>1){
         ark1<-titres[1]
