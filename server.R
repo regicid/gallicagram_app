@@ -964,8 +964,8 @@ shinyServer(function(input, output,session){
   output$legende=renderText("Source : gallica.bnf.fr")
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   nb_mots<-length(unique(data[["tableau"]]$mot))
-  output$legende2<-renderText(str_c(as.character(sum(data[["tableau"]]$base)/nb_mots)," documents épluchés"))
-  output$legende3<-renderText(str_c(as.character(sum(data[["tableau"]]$count))," résultats trouvés"))
+  output$legende2<-renderText(str_c("Documents épluchés : ",as.character(sum(data[["tableau"]]$base)/nb_mots)))
+  output$legende3<-renderText(str_c("Résultats trouvés : ",as.character(sum(data[["tableau"]]$count))))
   
   recherche_texte<-reactive({input$mot})
   recherche_from<-reactive({input$beginning})
@@ -1078,13 +1078,13 @@ shinyServer(function(input, output,session){
     
     if(input$doc_type==1 | (input$doc_type==2 & input$search_mode==1) | (input$doc_type==3 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7){
       nb_mots<-length(unique(df[["tableau"]]$mot))
-      output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base)/nb_mots)," documents épluchés"))
-      output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," résultats trouvés"))
+      output$legende2<-renderText(str_c("Documents épluchés : ",as.character(sum(df[["tableau"]]$base)/nb_mots)))
+      output$legende3<-renderText(str_c("Résultats trouvés : ", as.character(sum(df[["tableau"]]$count))))
     }
     else if(input$doc_type==4 & input$search_mode==1){
       nb_mots<-length(unique(df[["tableau_volume"]]$mot))
-      output$legende2<-renderText(str_c(as.character(sum(df[["tableau_volume"]]$base)/nb_mots)," documents épluchées"))
-      output$legende3<-renderText(str_c(as.character(sum(df[["tableau_volume"]]$count))," résultats trouvés"))
+      output$legende2<-renderText(str_c("Documents épluchées : ", as.character(sum(df[["tableau_volume"]]$base)/nb_mots)))
+      output$legende3<-renderText(str_c("Résultats trouvés : ", as.character(sum(df[["tableau_volume"]]$count))))
     }
     else if (input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){
       output$legende2<-NULL
@@ -1092,18 +1092,18 @@ shinyServer(function(input, output,session){
     }
     else if (input$doc_type==11 | input$doc_type==13 | input$doc_type==14) {
       nb_mots<-length(unique(df[["tableau"]]$mot))
-      output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base)/nb_mots)," pages épluchées"))
-      output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," pages correspondant à la recherche"))
+      output$legende2<-renderText(str_c("Pages épluchées : ", as.character(sum(df[["tableau"]]$base)/nb_mots)))
+      output$legende3<-renderText(str_c("Pages correspondant à la recherche : ", as.character(sum(df[["tableau"]]$count))))
     }
     else if (input$doc_type==8 | input$doc_type==15 | input$doc_type==16) {
       nb_mots<-length(unique(df[["tableau"]]$mot))
-      output$legende2<-renderText(str_c(as.character(sum(df[["tableau"]]$base)/nb_mots)," articles épluchés"))
-      output$legende3<-renderText(str_c(as.character(sum(df[["tableau"]]$count))," articles correspondant à la recherche"))
+      output$legende2<-renderText(str_c("Articles épluchés : ", as.character(sum(df[["tableau"]]$base)/nb_mots)))
+      output$legende3<-renderText(str_c("Articles correspondant à la recherche : ", as.character(sum(df[["tableau"]]$count))))
     }
     else {
       nb_mots<-length(unique(df[["tableau_page"]]$mot))
-      output$legende2<-renderText(str_c(as.character(sum(df[["tableau_page"]]$base)/nb_mots)," pages épluchées"))
-      output$legende3<-renderText(str_c(as.character(sum(df[["tableau_page"]]$count))," pages correspondant à la recherche"))
+      output$legende2<-renderText(str_c("Pages épluchées : ", as.character(sum(df[["tableau_page"]]$base)/nb_mots)))
+      output$legende3<-renderText(str_c("Pages correspondant à la recherche : ", as.character(sum(df[["tableau_page"]]$count))))
     }
     
     
