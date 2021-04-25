@@ -992,31 +992,31 @@ shinyServer(function(input, output,session){
   observeEvent(input$doc_type,{
     if(input$doc_type == 2){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1,"Par page" = 2),selected = 1)
-      updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année"),selected = "Année",inline = T)
     }
     if(input$doc_type == 4 | input$doc_type == 3){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1,"Par page" = 2),selected = 1)
-      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
     if(input$doc_type == 1 | input$doc_type == 6 | input$doc_type == 7 ){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1),selected = 1)
-      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
     if(input$doc_type == 5 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 12){
       updateSelectInput(session,"search_mode",choices = list("Par n-gramme" = 3),selected = 3)
-      updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année"),selected = "Année",inline = T)
     }
     if(input$doc_type == 11){
       updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
-      updateSelectInput(session,"resolution",choices = c("Année"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année"),selected = "Année",inline = T)
     }
     if(input$doc_type == 13 | input$doc_type == 14){
       updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
-      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
     if(input$doc_type == 8 | input$doc_type == 15 | input$doc_type == 16){
       updateSelectInput(session,"search_mode",choices = list("Par article" = 4),selected = 4)
-      updateSelectInput(session,"resolution",choices = c("Année","Mois"),selected = "Année")
+      updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
     })
   
