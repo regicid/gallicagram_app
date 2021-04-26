@@ -45,14 +45,22 @@ Plot <- function(data,input){
     tableau$date<-as.Date.character(tableau$date,format = c("%Y/%m/%d"))
   }
     Title = paste("")
+    tableau$scale<-tableau$ratio
+    
+      for(mot in str_split(data$mot,"&")[[1]]){
+        z = which(tableau$mot==mot)
+        tableau$scale[z]=scale(tableau$scale[z],center = T,scale = T)
+        }
+    
     width = length(unique(tableau$date))
     span = 2/width + input$span*(width-2)/(10*width)
-    tableau$loess = tableau$ratio
+    if(input$scale==TRUE){tableau$loess = tableau$scale}
+    else {tableau$loess = tableau$ratio}
     if(input$span >0){
       for(mot in str_split(data$mot,"&")[[1]]){
         z = which(tableau$mot==mot)
         x = 1:length(z)
-        tableau$loess[z] = loess(tableau$ratio[z]~x,span=span)$fitted
+        tableau$loess[z] = loess(tableau$loess[z]~x,span=span)$fitted
       }}
     
     dn<-as.character(max(format(tableau$ratio,scientific=FALSE)))
