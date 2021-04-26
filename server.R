@@ -1180,11 +1180,10 @@ shinyServer(function(input, output,session){
         paste("gallicagram_",input$mot,"_",input$beginning,"_",input$end,'.csv', sep='')
       },
       content = function(con) {
-        if(input$search_mode==2){write.csv(df$tableau_page, con,row.names = F,fileEncoding = "UTF-8")}
-        if(input$search_mode==1 & input$doc_type!=4){write.csv(df$tableau, con,row.names = F,fileEncoding = "UTF-8")}
-        if(input$search_mode==3){write.csv(df$tableau, con,row.names = F,fileEncoding = "UTF-8")}
-        if(input$search_mode==1 & input$doc_type==4){write.csv(df$tableau_volume, con,row.names = F,fileEncoding = "UTF-8")}
-        })
+        if((input$doc_type==2 | input$doc_type==3 | input$doc_type==4) & input$search_mode==2){write.csv(df$tableau_page, con,row.names = F,fileEncoding = "UTF-8")}
+        else if(input$search_mode==1 & input$doc_type==4){write.csv(df$tableau_volume, con,row.names = F,fileEncoding = "UTF-8")}
+        else{write.csv(df$tableau, con,row.names = F,fileEncoding = "UTF-8")}
+      })
     output$downloadPlot <- downloadHandler(
       filename = function() {
         paste('plot_',input$mot,"_",input$beginning,"_",input$end,'.html', sep='')
