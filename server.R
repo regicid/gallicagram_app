@@ -39,6 +39,11 @@ Plot <- function(data,input){
     tableau = data[["tableau_volume"]]
   }
   }
+  
+  if(data[["resolution"]]=="Mois"){
+    tableau$date<-str_c(tableau$date,"/01")
+    tableau$date<-as.Date.character(tableau$date,format = c("%Y/%m/%d"))
+  }
     Title = paste("")
     width = length(unique(tableau$date))
     span = 2/width + input$span*(width-2)/(10*width)
@@ -60,7 +65,8 @@ Plot <- function(data,input){
     digit_number<-str_c(".",digit_number,"%")
     }
     
-    tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")
+    if(data[["resolution"]]=="Mois"){tableau$hovers = str_c(str_extract(tableau$date,"......."),": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")}
+    else{tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")}
     y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
     x <- list(title = "",titlefont = 41)
     if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){
