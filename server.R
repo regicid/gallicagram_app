@@ -527,10 +527,14 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
     base=read.csv("base_presse_annees_limedia_fr.csv")
   }else  if(doc_type==18 & resolution=="Mois"){
     base=read.csv("base_presse_mois_limedia_fr.csv")
+  }else  if(doc_type==19 & resolution=="Année"){
+    base=read.csv("base_presse_annees_memonum_fr.csv")
+  }else  if(doc_type==19 & resolution=="Mois"){
+    base=read.csv("base_presse_mois_memonum_fr.csv")
   }
   
   
-  if(doc_type==13 | doc_type==14){
+  if(doc_type==13 | doc_type==14 | doc_type==19){
     if(se=="windows"){system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
       rD <- rsDriver(browser = "firefox", port = 4444L)}
     #if(se=="linux"){system("kill -9 $(lsof -t -i:4444)", intern=FALSE, ignore.stdout=FALSE)}
@@ -560,6 +564,9 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
           or1_end[j]<-str_c("&w=%22",mots_or[j],"%22")}
           if(doc_type==15 | doc_type==16)
           {or1[j]<-str_c("+OR+%22",mots_or[j],"%22")
+          or1_end[j]<-str_c("")}
+          if(doc_type==19)
+          {or1[j]<-str_c(",%22",mots_or[j],"%22")
           or1_end[j]<-str_c("")}
           
           or<-str_c(or,or1[j])
@@ -684,6 +691,15 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
               url<-str_c("https://kiosque.limedia.fr/recherche/?query=",mot1,"&search_type=exact&uniform_title=&date=&period_start=01/01/",y,"&period_end=31/12/",y,"&filter_language=fre&sort_patrimonial=item_created_start_asc")
               }
           }
+          if(doc_type == 19){
+            if(resolution=="Mois"){
+              z = as.character(j)
+              if(nchar(z)<2){z<-str_c("0",z)}
+              beginning = str_c(y,"-",z,"-01")
+              end = str_c(y,"-",z,"-",end_of_month[j])
+              url<-str_c("https://memonum-mediatheques.montpellier3m.fr/form.aspx?SC=MEMONUM_ENCART_SEARCH#/Search/(query:(ForceSearch:!t,Grid:'%7B%22717%22:%5B%22",mot1,"%22",or,"%5D,%22719%22:%5B%22*",z,"/",y,"%22%5D%7D',Page:0,PageRange:3,QueryString:!n,ResultSize:10,ScenarioCode:MEMONUM_ENCART_SEARCH,SearchContext:1))")}
+            if(resolution=="Année"){url<-str_c("https://memonum-mediatheques.montpellier3m.fr/form.aspx?SC=MEMONUM_ENCART_SEARCH#/Search/(query:(ForceSearch:!t,Grid:'%7B%22717%22:%5B%22",mot1,"%22",or,"%5D,%22719%22:%5B%22*",y,"%22%5D%7D',Page:0,PageRange:3,QueryString:!n,ResultSize:10,ScenarioCode:MEMONUM_ENCART_SEARCH,SearchContext:1))")}
+          }
           
         
         
@@ -739,6 +755,16 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram<-read_html(RETRY("GET",url,times = 6))
             a<-str_extract(html_text(html_node(ngram,".col-milieu")),"[:digit:]+")
           }
+          if(doc_type == 19){
+            remDr$navigate(url)
+            Sys.sleep(2) # give the page time to fully load
+            ngram <- remDr$getPageSource()[[1]]
+            ngram<-str_remove_all(ngram,"[:space:]")
+            ngram<-str_remove_all(ngram,"<span>")
+            ngram<-str_remove_all(ngram,"</span>")
+            ngram<-str_extract(ngram,"Résultats1à[:digit:]+sur[:digit:]+")
+            a<-str_remove(ngram,"Résultats1à[:digit:]+sur")
+          }
         
         
           if(doc_type == 3){
@@ -746,10 +772,10 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
             b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
           }
-          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17 | doc_type==18)){
+          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17 | doc_type==18 | doc_type==19)){
             date=str_c(y,"/",z)
             b<-as.integer(base$base[base$date==date])}
-          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17 | doc_type==18)){b<-as.integer(base$base[base$date==y])}
+          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17 | doc_type==18 | doc_type==19)){b<-as.integer(base$base[base$date==y])}
           if(length(b)==0L){b=0}
           tableau[nrow(tableau)+1,] = NA
           date=y
@@ -857,6 +883,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   if(doc_type==17){tableau$corpus="presse_fr_lectura"
   tableau$search_mode<-"page"}
   if(doc_type==18){tableau$corpus="presse_fr_limedia"
+  tableau$search_mode<-"volume"}
+  if(doc_type==19){tableau$corpus="presse_fr_memonum"
   tableau$search_mode<-"volume"}
   
   memoire<<-bind_rows(tableau,memoire)
@@ -998,7 +1026,7 @@ shinyServer(function(input, output,session){
   corpus_precedent<<-"1_1"
   
   observeEvent(input$doc_type,{observeEvent(input$search_mode,{
-    if((input$doc_type == 1 & input$search_mode == 1)|(input$doc_type == 2 & input$search_mode == 1)|(input$doc_type == 3 & input$search_mode == 1)|input$doc_type == 5|input$doc_type == 6|input$doc_type == 7|input$doc_type == 8|input$doc_type == 9|input$doc_type == 10|input$doc_type == 11|input$doc_type == 12|input$doc_type == 15|input$doc_type == 16){
+    if((input$doc_type == 1 & input$search_mode == 1)|(input$doc_type == 2 & input$search_mode == 1)|(input$doc_type == 3 & input$search_mode == 1)|input$doc_type == 5|input$doc_type == 6|input$doc_type == 7|input$doc_type == 8|input$doc_type == 9|input$doc_type == 10|input$doc_type == 11|input$doc_type == 12|input$doc_type == 15|input$doc_type == 16|input$doc_type == 19){
       output$instructions <- renderUI(HTML('<ul><li>Séparer les termes par un "&" pour une recherche multiple</li><li>Utiliser "a+b" pour rechercher a OU b</li><li>Cliquer sur un point du graphique pour accéder aux documents dans la bibliothèque numérique correspondante</li></ul>'))
       
     }else if(input$doc_type==13|input$doc_type==14|input$doc_type==17|input$doc_type==18){
@@ -1047,7 +1075,7 @@ shinyServer(function(input, output,session){
   
   observeEvent(input$language,{
     if(input$language == 1){
-      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse suisse-romande / Bibliothèque nationale suisse"=15, "Presse wallonne / KBR"=13, "Presse du sillon Lorrain / Limedia"=18, "Presse Auvergne-Rhône-Alpes / Lectura"=17, "Presse française / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5),selected = 1)
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse suisse-romande / Bibliothèque nationale suisse"=15, "Presse wallonne / KBR"=13, "Presse du sillon Lorrain / Limedia"=18, "Presse méridionale / Mémonum"=19, "Presse Auvergne-Rhône-Alpes / Lectura"=17, "Presse française / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5),selected = 1)
     }
     else if(input$language == 2){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse allemande / Europeana" = 6,"Presse suisse-allemande / Bibliothèque nationale suisse"=16 , "Livres / Ngram Viewer Allemand" = 9),selected = 6)
@@ -1070,7 +1098,7 @@ shinyServer(function(input, output,session){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1,"Par page" = 2),selected = 1)
       updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
-    if(input$doc_type == 1 | input$doc_type == 6 | input$doc_type == 7 | input$doc_type == 18){
+    if(input$doc_type == 1 | input$doc_type == 6 | input$doc_type == 7 | input$doc_type == 18 | input$doc_type == 19){
       updateSelectInput(session,"search_mode",choices = list("Par document" = 1),selected = 1)
       updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
@@ -1125,7 +1153,7 @@ shinyServer(function(input, output,session){
   observeEvent(input$do,{
     # datasetInput <- reactive({
     #   data$tableau})
-    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 11 | input$doc_type == 12 | input$doc_type == 13 | input$doc_type == 14 | input$doc_type == 15 | input$doc_type == 16 | input$doc_type == 17 | input$doc_type == 18){
+    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 11 | input$doc_type == 12 | input$doc_type == 13 | input$doc_type == 14 | input$doc_type == 15 | input$doc_type == 16 | input$doc_type == 17 | input$doc_type == 18 | input$doc_type == 19){
       df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)}
     else if(input$doc_type==4){
       inFile<-input$target_upload
@@ -1148,7 +1176,7 @@ shinyServer(function(input, output,session){
     
     output$plot <- renderPlotly({Plot(df,input)})
     
-    if(input$doc_type==1 | (input$doc_type==2 & input$search_mode==1) | (input$doc_type==3 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type == 18){
+    if(input$doc_type==1 | (input$doc_type==2 & input$search_mode==1) | (input$doc_type==3 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type == 18 | input$doc_type == 19){
       nb_mots<-length(unique(df[["tableau"]]$mot))
       output$legende2<-renderText(str_c("Documents épluchés : ",as.character(sum(df[["tableau"]]$base)/nb_mots)))
       output$legende3<-renderText(str_c("Résultats trouvés : ", as.character(sum(df[["tableau"]]$count))))
@@ -1188,14 +1216,15 @@ shinyServer(function(input, output,session){
     if(input$doc_type==15 | input$doc_type==16){output$legende=renderText("Source : e-newspaperarchives.ch")}
     if(input$doc_type==17){output$legende=renderText("Source : lectura.plus/Presse")}
     if(input$doc_type==18){output$legende=renderText("Source : kiosque.limedia.fr")}
+    if(input$doc_type==19){output$legende=renderText("Source : memonum-mediatheques.montpellier3m.fr")}
     
-    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13 | input$doc_type==15 | input$doc_type==17 | input$doc_type==18){output$legende4=renderText("Langue : français")}
+    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13 | input$doc_type==15 | input$doc_type==17 | input$doc_type==18 | input$doc_type==19){output$legende4=renderText("Langue : français")}
     if(input$doc_type==6 | input$doc_type==9 | input$doc_type==16){output$legende4=renderText("Langue : allemand")}
     if(input$doc_type==7 | input$doc_type==14){output$legende4=renderText("Langue : néerlandais")}
     if(input$doc_type==8 | input$doc_type==10){output$legende4=renderText("Langue : anglais")}
     if(input$doc_type==11 | input$doc_type==12){output$legende4=renderText("Langue : espagnol")}
     
-    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type==11 | input$doc_type==13 | input$doc_type==14 | input$doc_type==15 | input$doc_type==16 | input$doc_type==17 | input$doc_type==18){output$legende1<-renderText("Corpus : presse")}
+    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type==11 | input$doc_type==13 | input$doc_type==14 | input$doc_type==15 | input$doc_type==16 | input$doc_type==17 | input$doc_type==18 | input$doc_type==19){output$legende1<-renderText("Corpus : presse")}
     if(input$doc_type==2 | input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende1<-renderText("Corpus : livres")}
     if(input$doc_type==4){output$legende1<-renderText("Corpus : personnalisé")}
     if(input$doc_type==3){
