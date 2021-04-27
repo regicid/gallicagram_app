@@ -519,7 +519,12 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
     base=read.csv("base_presse_annees_e-newspaperarchives_de.csv")
   }else  if(doc_type==16 & resolution=="Mois"){
     base=read.csv("base_presse_mois_e-newspaperarchives_de.csv")
+  }else  if(doc_type==17 & resolution=="Année"){
+    base=read.csv("base_presse_annees_lectura_fr.csv")
+  }else  if(doc_type==17 & resolution=="Mois"){
+    base=read.csv("base_presse_mois_lectura_fr.csv")
   }
+  
   
   if(doc_type==13 | doc_type==14){
     if(se=="windows"){system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
@@ -651,8 +656,21 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
               url<-str_c("https://www.e-newspaperarchives.ch/?a=q&hs=1&r=1&results=1&txq=%22",mot1,"%22",or,"&dafdq=01&dafmq=01&dafyq=",y,"&datdq=31&datmq=12&datyq=",y,"&laq=de&puq=&txf=txIN&ssnip=&ccq=&l=fr&tyq=ARTICLE")
             }
           }
+          if(doc_type == 17){
+            if(resolution=="Mois"){
+              z = as.character(j)
+              if(nchar(z)<2){z<-str_c("0",z)}
+              beginning = str_c(y,"-",z,"-01")
+              end = str_c(y,"-",z,"-",end_of_month[j])
+              url<-str_c("https://www.lectura.plus/Presse/search/?query=",mot1,"&fromDate=01%2F",z,"%2F",y,"&untilDate=",end_of_month[j],"%2F",z,"%2F",y)
+              }
+            if(resolution=="Année"){
+              url<-str_c("https://www.lectura.plus/Presse/search/?query=",mot1,"&fromDate=01%2F01%2F",y,"&untilDate=31%2F12%2F",y)
+            }
+          }
           
-          
+        
+        
           if(doc_type == 1 | doc_type == 3){ngram<-as.character(read_xml(RETRY("GET",url,times = 6)))
             a<-str_extract(str_extract(ngram,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
           }
@@ -695,17 +713,23 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
             ngram<-str_remove(ngram,"Résultats 1 - 20 de  ")
             a<-str_extract(ngram,"[:digit:]+")
           }
-          
+          if(doc_type == 17){
+            ngram<-as.character(read_html(RETRY("GET",url,times = 6)))
+            ngram<-str_extract(ngram,"width:100px.+")
+            ngram<-str_remove(ngram,"width:100px")
+            a<-str_extract(ngram,"[:digit:]+")
+          }
+        
         
           if(doc_type == 3){
             url_base <- str_c("https://gallica.bnf.fr/SRU?operation=searchRetrieve&version=1.2&startRecord=0&maximumRecords=1&page=1&collapsing=false&exactSearch=true&query=(dc.relation%20any%20%22",ark1,"%22",ark3,")%20and%20(ocr.quality%20all%20%22Texte%20disponible%22)%20and%20(gallicapublication_date%3E=%22",beginning,"%22%20and%20gallicapublication_date%3C=%22",end,"%22)%20sortby%20dc.date")
             ngram_base<-as.character(read_xml(RETRY("GET",url_base,times = 6)))
             b<-str_extract(str_extract(ngram_base,"numberOfRecordsDecollapser&gt;+[:digit:]+"),"[:digit:]+")
           }
-          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16)){
+          if(resolution=="Mois"& (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17)){
             date=str_c(y,"/",z)
             b<-as.integer(base$base[base$date==date])}
-          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16)){b<-as.integer(base$base[base$date==y])}
+          else if (resolution=="Année" & (doc_type==1 | doc_type==6 | doc_type==7 | doc_type==8 | doc_type==11 | doc_type==13 | doc_type==14 | doc_type==15 | doc_type==16 | doc_type==17)){b<-as.integer(base$base[base$date==y])}
           if(length(b)==0L){b=0}
           tableau[nrow(tableau)+1,] = NA
           date=y
@@ -810,6 +834,8 @@ get_data <- function(mot,from,to,resolution,doc_type,titres){
   tableau$search_mode<-"article"}
   if(doc_type==16){tableau$corpus="presse_de_bns"
   tableau$search_mode<-"article"}
+  if(doc_type==17){tableau$corpus="presse_fr_lectura"
+  tableau$search_mode<-"page"}
   
   memoire<<-bind_rows(tableau,memoire)
   data = list(tableau,paste(mots,collapse="&"),resolution)
@@ -991,7 +1017,7 @@ shinyServer(function(input, output,session){
   
   observeEvent(input$language,{
     if(input$language == 1){
-      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse suisse-romande / Bibliothèque nationale suisse"=15, "Presse wallonne / KBR"=13, "Presse française / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5),selected = 1)
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse suisse-romande / Bibliothèque nationale suisse"=15, "Presse wallonne / KBR"=13, "Presse Auvergne-Rhône-Alpes / Lectura"=17, "Presse française / Gallica" = 1,"Recherche par titre de presse / Gallica" = 3, "Corpus personnalisé / Gallica"=4, "Livres / Gallica" = 2,"Livres / Ngram Viewer - Google Books" = 5),selected = 1)
     }
     else if(input$language == 2){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse allemande / Europeana" = 6,"Presse suisse-allemande / Bibliothèque nationale suisse"=16 , "Livres / Ngram Viewer Allemand" = 9),selected = 6)
@@ -1026,7 +1052,7 @@ shinyServer(function(input, output,session){
       updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
       updateRadioButtons(session,"resolution",choices = c("Année"),selected = "Année",inline = T)
     }
-    if(input$doc_type == 13 | input$doc_type == 14){
+    if(input$doc_type == 13 | input$doc_type == 14 | input$doc_type == 17){
       updateSelectInput(session,"search_mode",choices = list("Par page" = 2),selected = 2)
       updateRadioButtons(session,"resolution",choices = c("Année","Mois"),selected = "Année",inline = T)
     }
@@ -1039,7 +1065,7 @@ shinyServer(function(input, output,session){
   
   observeEvent(
     input$search_mode,{
-      if(input$search_mode==2 & input$doc_type != 11){
+      if(input$search_mode==2 & (input$doc_type ==1 |input$doc_type ==2 |input$doc_type ==3 |input$doc_type ==4)){
         output$avertissement<-renderText(message(recherche_texte(),recherche_from(),recherche_to(),recherche_doc_type(),recherche_titres()))
     }
     })
@@ -1069,7 +1095,7 @@ shinyServer(function(input, output,session){
   observeEvent(input$do,{
     # datasetInput <- reactive({
     #   data$tableau})
-    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 11 | input$doc_type == 12 | input$doc_type == 13 | input$doc_type == 14 | input$doc_type == 15 | input$doc_type == 16 ){
+    if (input$doc_type==1 |(input$doc_type==3 & input$search_mode==1) | input$doc_type==5 | (input$doc_type==2 & input$search_mode==1) | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type == 9 | input$doc_type == 10 | input$doc_type == 11 | input$doc_type == 12 | input$doc_type == 13 | input$doc_type == 14 | input$doc_type == 15 | input$doc_type == 16 | input$doc_type == 17){
       df = get_data(input$mot,input$beginning,input$end,input$resolution,input$doc_type,input$titres)}
     else if(input$doc_type==4){
       inFile<-input$target_upload
@@ -1106,7 +1132,7 @@ shinyServer(function(input, output,session){
       output$legende2<-NULL
       output$legende3<-NULL
     }
-    else if (input$doc_type==11 | input$doc_type==13 | input$doc_type==14) {
+    else if (input$doc_type==11 | input$doc_type==13 | input$doc_type==14 | input$doc_type==17) {
       nb_mots<-length(unique(df[["tableau"]]$mot))
       output$legende2<-renderText(str_c("Pages épluchées : ", as.character(sum(df[["tableau"]]$base)/nb_mots)))
       output$legende3<-renderText(str_c("Pages correspondant à la recherche : ", as.character(sum(df[["tableau"]]$count))))
@@ -1130,14 +1156,15 @@ shinyServer(function(input, output,session){
     if(input$doc_type==11){output$legende=renderText("Source : hemerotecadigital.bne.es")}
     if(input$doc_type==13 | input$doc_type==14){output$legende=renderText("Source : belgicapress.be")}
     if(input$doc_type==15 | input$doc_type==16){output$legende=renderText("Source : e-newspaperarchives.ch")}
+    if(input$doc_type==17){output$legende=renderText("Source : lectura.plus/Presse")}
     
-    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13 | input$doc_type==15){output$legende4=renderText("Langue : français")}
+    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13 | input$doc_type==15 | input$doc_type==17){output$legende4=renderText("Langue : français")}
     if(input$doc_type==6 | input$doc_type==9 | input$doc_type==16){output$legende4=renderText("Langue : allemand")}
     if(input$doc_type==7 | input$doc_type==14){output$legende4=renderText("Langue : néerlandais")}
     if(input$doc_type==8 | input$doc_type==10){output$legende4=renderText("Langue : anglais")}
     if(input$doc_type==11 | input$doc_type==12){output$legende4=renderText("Langue : espagnol")}
     
-    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type==11 | input$doc_type==13 | input$doc_type==14 | input$doc_type==15 | input$doc_type==16){output$legende1<-renderText("Corpus : presse")}
+    if(input$doc_type==1 | input$doc_type==6 | input$doc_type==7 | input$doc_type==8 | input$doc_type==11 | input$doc_type==13 | input$doc_type==14 | input$doc_type==15 | input$doc_type==16 | input$doc_type==17){output$legende1<-renderText("Corpus : presse")}
     if(input$doc_type==2 | input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende1<-renderText("Corpus : livres")}
     if(input$doc_type==4){output$legende1<-renderText("Corpus : personnalisé")}
     if(input$doc_type==3){
