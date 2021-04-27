@@ -76,10 +76,12 @@ Plot <- function(data,input){
     if(data[["resolution"]]=="Mois"){tableau$hovers = str_c(str_extract(tableau$date,"......."),": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")}
     else{tableau$hovers = str_c(tableau$date,": x/N = ",tableau$count,"/",tableau$base,"\n                 = ",round(tableau$ratio*100,digits = 1),"%")}
     y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
+    if(input$scale==TRUE){y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41)}
     x <- list(title = "",titlefont = 41)
     if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){
       tableau$hovers = str_c(tableau$date," : ",round(tableau$ratio*100,digits = 5),"%")
       y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41,tickformat = digit_number)
+      if(input$scale==TRUE){y <- list(title = "Fréquence d'occurrence dans\nle corpus",titlefont = 41)}
       }
     plot = plot_ly(tableau, x=~date,y=~loess,text=~hovers,color =~mot,type='scatter',mode='spline',hoverinfo="text",customdata=tableau$url)
     plot = layout(plot, yaxis = y, xaxis = x,title = Title)
