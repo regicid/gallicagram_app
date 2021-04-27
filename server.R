@@ -62,7 +62,7 @@ Plot <- function(data,input){
         x = 1:length(z)
         tableau$loess[z] = loess(tableau$loess[z]~x,span=span)$fitted
       }}
-    tableau$loess[tableau$loess<0]<-0
+    if(input$scale==TRUE){tableau$loess[tableau$loess<0]<-0}
     dn<-as.character(max(format(tableau$ratio,scientific=FALSE)))
     if(max(tableau$ratio)>=0.1){digit_number=".1%"}
     else{
