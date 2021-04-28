@@ -1105,7 +1105,7 @@ shinyServer(function(input, output,session){
   output$corr<-renderTable(correlation_matrix(prepare_correlation(data),"corr1"),rownames = TRUE)
   output$pvalue=renderText("***p<.001 ; **p<.01 ; *p<.05")
   
-  output$legende=renderText("Source : gallica.bnf.fr")
+  output$legende=renderText(HTML(paste("Source : ","<a href = 'https://gallica.bnf.fr/'> ","gallica.bnf.fr","</a>"),sep = ""))
   output$legende0=renderText("Affichage : Gallicagram par Benjamin Azoulay et Benoît de Courson")
   nb_mots<-length(unique(data[["tableau"]]$mot))
   output$legende2<-renderText(str_c("Documents épluchés : ",as.character(sum(data[["tableau"]]$base)/nb_mots)))
@@ -1254,23 +1254,22 @@ shinyServer(function(input, output,session){
       output$legende3<-renderText(str_c("Pages correspondant à la recherche : ", as.character(sum(df[["tableau_page"]]$count))))
     }
     
-    
-    if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende=renderText("Source : books.google.com/ngrams")}
-    if(input$doc_type==6 | input$doc_type==7){output$legende=renderText("Source : europeana.eu")}
-    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4){output$legende=renderText("Source : gallica.bnf.fr")}
-    if(input$doc_type==8){output$legende=renderText("Source : britishnewspaperarchive.co.uk")}
-    if(input$doc_type==11){output$legende=renderText("Source : hemerotecadigital.bne.es")}
-    if(input$doc_type==13 | input$doc_type==14){output$legende=renderText("Source : belgicapress.be")}
-    if(input$doc_type==15 | input$doc_type==16){output$legende=renderText("Source : e-newspaperarchives.ch")}
-    if(input$doc_type==17){output$legende=renderText("Source : lectura.plus/Presse")}
-    if(input$doc_type==18){output$legende=renderText("Source : kiosque.limedia.fr")}
-    if(input$doc_type==19){output$legende=renderText("Source : memonum-mediatheques.montpellier3m.fr")}
-    if(input$doc_type==20){output$legende=renderText("Source : communpatrimoine.fr")}
-    if(input$doc_type==21){output$legende=renderText("Source : yroise.biblio.brest.fr")}
-    if(input$doc_type==22){output$legende=renderText("Source : pireneas.fr")}
-    if(input$doc_type==23){output$legende=renderText("Source : rosalis.bibliotheque.toulouse.fr")}
-    if(input$doc_type==24){output$legende=renderText("Source : bibliotheque-numerique.diplomatie.gouv.fr")}
-    if(input$doc_type==25){output$legende=renderText("Source : rfnum-bibliotheque.org")}
+    if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://gallica.bnf.fr/'> ","gallica.bnf.fr","</a>"),sep = ""))}
+    if(input$doc_type==5 | input$doc_type==9 | input$doc_type==10 | input$doc_type==12){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://books.google.com/ngrams/'> ","books.google.com/ngrams","</a>"),sep = ""))}
+    if(input$doc_type==6 | input$doc_type==7){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.europeana.eu/'> ","europeana.eu","</a>"),sep = ""))}
+    if(input$doc_type==8){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.britishnewspaperarchive.co.uk/'> ","britishnewspaperarchive.co.uk","</a>"),sep = ""))}
+    if(input$doc_type==11){output$legende=renderText(HTML(paste("Source : ","<a href = 'http://www.hemerotecadigital.bne.es/'> ","hemerotecadigital.bne.es","</a>"),sep = ""))}
+    if(input$doc_type==13 | input$doc_type==14){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.belgicapress.be/'> ","belgicapress.be","</a>"),sep = ""))}
+    if(input$doc_type==15 | input$doc_type==16){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.e-newspaperarchives.ch/'> ","e-newspaperarchives.ch","</a>"),sep = ""))}
+    if(input$doc_type==17){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.lectura.plus/Presse/'> ","lectura.plus/Presse","</a>"),sep = ""))}
+    if(input$doc_type==18){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://kiosque.limedia.fr/'> ","kiosque.limedia.fr","</a>"),sep = ""))}
+    if(input$doc_type==19){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://memonum-mediatheques.montpellier3m.fr/'> ","memonum-mediatheques.montpellier3m.fr","</a>"),sep = ""))}
+    if(input$doc_type==20){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.communpatrimoine.fr/'> ","communpatrimoine.fr","</a>"),sep = ""))}
+    if(input$doc_type==21){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://yroise.biblio.brest.fr/'> ","yroise.biblio.brest.fr","</a>"),sep = ""))}
+    if(input$doc_type==22){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://www.pireneas.fr/'> ","pireneas.fr","</a>"),sep = ""))}
+    if(input$doc_type==23){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://rosalis.bibliotheque.toulouse.fr/'> ","rosalis.bibliotheque.toulouse.fr","</a>"),sep = ""))}
+    if(input$doc_type==24){output$legende=renderText(HTML(paste("Source : ","<a href = 'https://bibliotheque-numerique.diplomatie.gouv.fr/'> ","bibliotheque-numerique.diplomatie.gouv.fr","</a>"),sep = ""))}
+    if(input$doc_type==25){output$legende=renderText(HTML(paste("Source : ","<a href = 'http://www.rfnum-bibliotheque.org/'> ","rfnum-bibliotheque.org","</a>"),sep = ""))}
     
     if(input$doc_type==1 | input$doc_type==2 | input$doc_type==3 | input$doc_type==4 | input$doc_type==5 | input$doc_type==13 | input$doc_type==15 | input$doc_type==17 | input$doc_type==18 | input$doc_type==19 | input$doc_type == 20 | input$doc_type == 21 | input$doc_type == 22  | input$doc_type == 23 | input$doc_type == 24 | input$doc_type == 25){output$legende4=renderText("Langue : français")}
     if(input$doc_type==6 | input$doc_type==9 | input$doc_type==16){output$legende4=renderText("Langue : allemand")}
