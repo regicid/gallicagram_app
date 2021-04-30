@@ -1266,12 +1266,12 @@ shinyServer(function(input, output,session){
       if(input$doc_type == 3 & input$theme_presse==2)
       {
         liste_journaux<-read.csv("liste_themes_principaux-quotidiens.csv",encoding="UTF-8")
-        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$titre), options = list(`actions-box` = TRUE),multiple = T)})
+        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
       }
       if(input$doc_type == 3 & input$theme_presse==3)
       {
         liste_journaux<-read.csv("liste_themes_presse-litteraire.csv",encoding="UTF-8")
-        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$titre), options = list(`actions-box` = TRUE),multiple = T)})
+        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
       }
     })})
   
