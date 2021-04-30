@@ -976,3 +976,34 @@ tableau$ark<-str_remove(tableau$ark,'".+')
 tableau$ark<-str_remove(tableau$ark,'%20')
 write.csv(tableau,"C:/Users/Benjamin/gallicagram_app/liste_themes_presse-syndicale.csv",fileEncoding = "UTF-8",row.names = F)
 
+######################
+liste_departements<-read.csv("C:/Users/Benjamin/gallicagram_app/liste_departements.csv",encoding = "UTF-8")
+liste_departements<-liste_departements[order(liste_departements$titre),]
+rownames(liste_departements)=NULL
+for (j in 1:length(liste_departements$url)) {
+  url=liste_departements$url[j]
+  page<-read_html(url)
+  page<-html_node(page,".mosaic")
+  nb<-str_count(page,"mosaic-item")
+  tableau<-as.data.frame(matrix(nrow=0,ncol=2),stringsAsFactors = FALSE)
+  for (i in 1:nb) {
+    a<-html_node(page,str_c("div.mosaic-item:nth-child(",i,")"))
+    ark<-str_extract(a,"ark:/12148/.+")
+    ark<-str_remove(ark,"ark:/12148/")
+    ark<-str_remove(ark,"/.+")
+    titre<-html_text(html_node(a,"div:nth-child(2) > div:nth-child(1) > a:nth-child(1)"))
+    titre<-str_remove_all(titre,"\t")
+    tableau<-rbind(tableau,cbind(ark,titre))
+  }
+  tableau<-tableau[is.na(tableau$ark)==FALSE,]
+  tableau$ark<-str_remove(tableau$ark,'".+')
+  tableau$ark<-str_remove(tableau$ark,'%20')
+  fichier<-liste_departements$titre[i]
+  fichier<-iconv(fichier,from="UTF-8",to="ASCII//TRANSLIT")
+  fichier<-str_to_lower(fichier)
+  fichier<-str_replace_all(fichier," ","-")
+  fichier<-str_c("C:/Users/Benjamin/gallicagram_app/liste_departement_",fichier,".csv")
+  write.csv(tableau,fichier,fileEncoding = "UTF-8",row.names = F)
+  print(j)
+}
+
