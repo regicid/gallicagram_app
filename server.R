@@ -1285,7 +1285,7 @@ shinyServer(function(input, output,session){
         fichier<-as.character(themes$csv[themes$num==input$theme_presse])
         liste_journaux<-read.csv(fichier,encoding="UTF-8")
         liste_journaux$titre<-str_remove_all(liste_journaux$titre,"\n")
-        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
+        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T,selected = as.character(liste_journaux$ark))})
       }
       else if(as.integer(input$theme_presse)>=51)
       {
@@ -1293,7 +1293,7 @@ shinyServer(function(input, output,session){
         fichier<-as.character(departement$csv[as.character(departement$num)==as.character(input$theme_presse)])
         liste_journaux<-read.csv(fichier,encoding="UTF-8")
         liste_journaux$titre<-str_remove_all(liste_journaux$titre,"\n")
-        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
+        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T,selected = as.character(liste_journaux$ark))})
       }
     }
       
