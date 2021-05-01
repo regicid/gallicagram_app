@@ -1286,22 +1286,8 @@ shinyServer(function(input, output,session){
     }
     if(input$doc_type == 3 & input$filtre==2)
     {
-      updateSelectizeInput(session,"theme_presse","Région",choices = list("Ain "=51,                    "Aisne"=52,                   "Allier "=53,                 "Alpes-de-Haute-Provence"=54, "Alpes Maritimes"=55,         "Ardèche"=56,                
-                                                                       "Ardennes"=57,                "Ariège"=58,                  "Aube"=59,                    "Aude"=60,                    "Aveyron"=61,                 "Bas-Rhin"=62,               
-                                                                       "Bouches-du-Rhône"=63,        "Calvados"=64,                "Cantal"=65,                  "Charente"=66,                "Charente-maritime"=67,       "Cher"=68,                   
-                                                                       "Corrèze"=69,                 "Corse"=70,                   "Côte d'or"=71,               "Côtes d'Armor"=72,           "Creuse"=73,                  "Deux-Sèvres"=74,            
-                                                                       "Dordogne"=75,                "Doubs"=76,                   "Drôme"=77,                                                 "Eure"=79,                    "Eure-et-Loir"=80,           
-                                                                       "Finistère"=81,               "Gard"=82,                    "Gers"=83,                    "Gironde"=84,                 "Haut-Rhin"=85,               "Haute-Garonne"=86,          
-                                                                       "Haute-Loire"=87,             "Haute-Marne"=88,             "Haute-Saône"=89,             "Haute-Vienne"=90,            "Hautes-Alpes"=91,            "Hautes Pyrénées"=92,        
-                                                                       "Hauts-de-Seine"=93,          "Hérault"=94,                 "Ille-et-Vilaine"=95,         "Indre"=96,                   "Indre-et-Loire"=97,          "Isère"=98,                  
-                                                                       "Jura"=99,                    "Landes"=100,                  "Loir-et-Cher"=101,            "Loire"=102,                   "Loire-Atlantique"=103,        "Loiret"=104,                 
-                                                                       "Lot"=105,                     "Lot-et-Garonne"=106,          "Lozère"=107,                  "Maine-et-Loire"=108,          "Manche"=109,                  "Marne"=110,                  
-                                                                       "Mayenne"=111,                 "Meurthe-et-Moselle"=112,      "Meuse"=113,                   "Morbihan"=114,                "Moselle"=115,                 "Nièvre"=116,                 
-                                                                       "Nord"=117,                    "Oise"=118,                    "Orne"=119,                    "Outre-mer"=120,               "Paris"=121,                   "Pas-de-Calais"=122,          
-                                                                       "Puy-de-Dôme"=123,             "Pyrenées-Atlantiques"=124,    "Pyrénées-Orientales"=125,     "Rhône"=126,                   "Saône-et-Loire"=127,          "Sarthe"=128,                 
-                                                                       "Savoie"=129,                  "Seine-et-Marne"=130,          "Seine-maritime"=131,          "Seine-Saint-Denis"=132,       "Somme"=133,                   "Tarn"=134,                   
-                                                                       "Tarn-et-Garonne"=135,         "Territoire de Belfort"=136,   "Val-d'Oise"=137,              "Val-de-Marne"=138,            "Var"=139,                     "Vaucluse"=140,               
-                                                                       "Vendée"=141,                  "Vienne"=142,                  "Vosges"=143,                  "Yonne"=144,                   "Yvelines"=145))
+      liste_departements<-read.csv("liste_departements.csv",encoding = "UTF-8")
+      updateSelectizeInput(session,"theme_presse","Région",choices = setNames(as.character(liste_departements$num),as.character(liste_departements$titre)))
     }
   })})
   
@@ -1313,7 +1299,7 @@ shinyServer(function(input, output,session){
         liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         output$titres<-renderUI({selectizeInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r",multiple=T)})
       }
-      else if(input$theme_presse>=2 & input$theme_presse<=50)
+      else if(as.integer(input$theme_presse) & as.integer(input$theme_presse)<=50)
       {
         themes<-read.csv("liste_themes.csv",encoding = "UTF-8")
         fichier<-as.character(themes$csv[themes$num==input$theme_presse])
@@ -1321,10 +1307,10 @@ shinyServer(function(input, output,session){
         liste_journaux$titre<-str_remove_all(liste_journaux$titre,"\n")
         output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
       }
-      else if(input$theme_presse>=51)
+      else if(as.integer(input$theme_presse)>=51)
       {
         departement<-read.csv("liste_departements.csv",encoding = "UTF-8")
-        fichier<-as.character(departement$csv[departement$num==input$theme_presse])
+        fichier<-as.character(departement$csv[as.character(departement$num)==as.character(input$theme_presse)])
         liste_journaux<-read.csv(fichier,encoding="UTF-8")
         liste_journaux$titre<-str_remove_all(liste_journaux$titre,"\n")
         output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})

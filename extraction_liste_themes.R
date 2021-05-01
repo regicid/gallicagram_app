@@ -1008,6 +1008,11 @@ for (j in 1:length(liste_departements$titre)) {
   print(fichier)
 }
 
+liste_departements<-read.csv("C:/Users/Benjamin/gallicagram_app/liste_departements.csv",encoding = "UTF-8")
+liste_departements<-liste_departements[order(liste_departements$titre),]
+rownames(liste_departements)=NULL
+liste_departements$csv=NA
+liste_departements$num=NA
 for (j in 1:length(liste_departements$titre)) {
   fichier<-liste_departements$titre[j]
   fichier<-iconv(fichier,from="UTF-8",to="ASCII//TRANSLIT")
@@ -1015,5 +1020,8 @@ for (j in 1:length(liste_departements$titre)) {
   fichier<-str_replace_all(fichier," $","")
   fichier<-str_replace_all(fichier," ","-")
   fichier<-str_c("liste_departement_",fichier,".csv")
-  print(fichier)
+  liste_departements$csv[j]<-fichier
+  liste_departements$num[j]<-j+50
 }
+liste_departements<-liste_departements[liste_departements$titre!="Essonne",]
+write.csv(liste_departements,"C:/Users/Benjamin/gallicagram_app/liste_departements.csv",fileEncoding = "UTF-8",row.names = F)
