@@ -980,7 +980,7 @@ write.csv(tableau,"C:/Users/Benjamin/gallicagram_app/liste_themes_presse-syndica
 liste_departements<-read.csv("C:/Users/Benjamin/gallicagram_app/liste_departements.csv",encoding = "UTF-8")
 liste_departements<-liste_departements[order(liste_departements$titre),]
 rownames(liste_departements)=NULL
-for (j in 1:length(liste_departements$url)) {
+for (j in 1:length(liste_departements$titre)) {
   url=liste_departements$url[j]
   page<-read_html(url)
   page<-html_node(page,".mosaic")
@@ -998,12 +998,13 @@ for (j in 1:length(liste_departements$url)) {
   tableau<-tableau[is.na(tableau$ark)==FALSE,]
   tableau$ark<-str_remove(tableau$ark,'".+')
   tableau$ark<-str_remove(tableau$ark,'%20')
-  fichier<-liste_departements$titre[i]
+  fichier<-liste_departements$titre[j]
   fichier<-iconv(fichier,from="UTF-8",to="ASCII//TRANSLIT")
   fichier<-str_to_lower(fichier)
+  fichier<-str_replace_all(fichier," $","")
   fichier<-str_replace_all(fichier," ","-")
   fichier<-str_c("C:/Users/Benjamin/gallicagram_app/liste_departement_",fichier,".csv")
   write.csv(tableau,fichier,fileEncoding = "UTF-8",row.names = F)
-  print(j)
+  print(fichier)
 }
 

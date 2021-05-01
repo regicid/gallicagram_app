@@ -1263,16 +1263,176 @@ shinyServer(function(input, output,session){
         liste_journaux<-read.csv("liste_journaux.csv",encoding="UTF-8")
         output$titres<-renderUI({selectizeInput("titres","Titre des journaux",choices = setNames(liste_journaux$ark,liste_journaux$title),selected="cb39294634r",multiple=T)})
       }
-      if(input$doc_type == 3 & input$theme_presse==2)
+      else if(input$doc_type == 3 & input$theme_presse!=1)
       {
-        liste_journaux<-read.csv("liste_themes_principaux-quotidiens.csv",encoding="UTF-8")
+        if(input$doc_type == 3 & input$theme_presse==2)
+        {
+          liste_journaux<-read.csv("liste_themes_principaux-quotidiens.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==3)
+        {
+          liste_journaux<-read.csv("liste_themes_hebdomadaires.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==4)
+        {
+          liste_journaux<-read.csv("liste_themes_feuilles-de-tranchee.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==5)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-principaux-titres.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==6)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-zone-sud.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==7)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-zone-interdite-et-reservee.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==8)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-zone-alsace-moselle.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==9)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-empire-francais.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==10)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-region-parisienne.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==11)
+        {
+          liste_journaux<-read.csv("liste_themes_resistance-zone-nord.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==12)
+        {
+          liste_journaux<-read.csv("liste_themes_anciens-combattants.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==13)
+        {
+          liste_journaux<-read.csv("liste_themes_faits-divers.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==14)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-artistique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==15)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-coloniale.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==16)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-culinaire.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==17)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-d'annonces.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==18)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-de-cinema.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==19)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-de-loisirs.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==20)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-de-mode.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==21)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-de-musique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==22)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-de-spectacles.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==23)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-des-immigrations.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==24)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-economique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==25)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-enfantine.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==26)
+        {
+          liste_journaux<-read.csv("liste_themes_journaux-d'entreprise.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==27)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-financiere.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==28)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-par-secteur-d'activites.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==29)
+        {
+          liste_journaux<-read.csv("liste_themes_annuaires-professionnels.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==30)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-feminine.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==31)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-feministe.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==32)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-litteraire.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==33)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-medicale.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==34)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-ouvriere.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==35)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-politique-revolution-empire.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==36)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-politique-restauration-second-empire.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==37)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-3e-republique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==38)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-professionnelle.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==39)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-religieuse.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==40)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-satirique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==41)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-scientifique.csv",encoding="UTF-8")
+        }
+        if(input$doc_type == 3 & input$theme_presse==42)
+        {
+          liste_journaux<-read.csv("liste_themes_presse-syndicale.csv",encoding="UTF-8")
+        }
+        
         output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
       }
-      if(input$doc_type == 3 & input$theme_presse==3)
-      {
-        liste_journaux<-read.csv("liste_themes_presse-litteraire.csv",encoding="UTF-8")
-        output$titres<-renderUI({pickerInput("titres","Titre des journaux",choices = setNames(as.character(liste_journaux$ark),as.character(liste_journaux$titre)), options = list(`actions-box` = TRUE),multiple = T)})
-      }
+      
     })})
   
   
