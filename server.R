@@ -116,7 +116,8 @@ Plot <- function(data,input){
     if(input$barplot){
       width = nrow(tableau)
       span = 2/width + input$span*(width-2)/(10*width)
-      tableau$hovers = str_c(tableau$date,": N = ",tableau$base)
+      if(data[["resolution"]]=="Mois"){tableau$hovers = str_c(str_extract(tableau$date,"......."),": N = ",tableau$base)}
+      else{tableau$hovers = str_c(str_extract(tableau$date,"...."),": N = ",tableau$base)}
       plot1 = plot_ly(tableau, x=~date[tableau$mot==mot[1]],y=~base[tableau$mot==mot[1]],text=~hovers[tableau$mot==mot[1]],type='bar',hoverinfo="text",marker = list(color='rgba(31, 119, 180,1)'))
       y <- list(title = "",titlefont = 41)
       x <- list(title = "",titlefont = 41)
