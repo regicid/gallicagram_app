@@ -1008,3 +1008,12 @@ for (j in 1:length(liste_departements$titre)) {
   print(fichier)
 }
 
+for (j in 1:length(liste_departements$titre)) {
+  fichier<-liste_departements$titre[j]
+  fichier<-iconv(fichier,from="UTF-8",to="ASCII//TRANSLIT")
+  fichier<-str_to_lower(fichier)
+  fichier<-str_replace_all(fichier," $","")
+  fichier<-str_replace_all(fichier," ","-")
+  fichier<-str_c("liste_departement_",fichier,".csv")
+  print(fichier)
+}
