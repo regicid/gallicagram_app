@@ -47,7 +47,8 @@ shinyUI(navbarPage("Gallicagram",
                                                 sliderInput("span","Lissage de la courbe",min = 0,max = 10,value = 0)
                                             ),
                                             
-                                            mainPanel(div(style="display: inline-block;vertical-align:bottom",dropdownButton(tags$h3("Options avancées"),
+                                            mainPanel(rclipboardSetup(),
+                                                      div(style="display: inline-block;vertical-align:bottom",dropdownButton(tags$h3("Options avancées"),
                                                                      checkboxInput("barplot", "Afficher la distribution des documents de la base de données ", value = FALSE),
                                                                      checkboxInput("correlation_test", "Afficher les matrices de corrélation", value = FALSE),
                                                                      checkboxInput("delta", "Représenter la différence de fréquence entre les deux premiers termes F(a)-F(b)", value = FALSE),
