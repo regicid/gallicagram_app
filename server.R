@@ -1162,7 +1162,7 @@ correlation_matrix <- function(df, corr,
                                show_significance = TRUE, 
                                replace_diagonal = TRUE, 
                                replacement = ""){
-  
+
   mots = colnames(df)
   # check arguments
   stopifnot({
@@ -1185,12 +1185,16 @@ correlation_matrix <- function(df, corr,
   
   # transform input data frame to matrix
   x <- as.matrix(df)
-  
+
   # run correlation analysis using Hmisc package
   correlation_matrix <- Hmisc::rcorr(x, type = )
   R <- correlation_matrix$r # Matrix of correlation coeficients
   p <- correlation_matrix$P # Matrix of p-value 
   
+  R[is.nan(R)]<-0
+  R[is.na(R)]<-0
+  p[is.nan(p)]<-1
+  p[is.na(p)]<-1
   # transform correlations to specific character format
   Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
   
