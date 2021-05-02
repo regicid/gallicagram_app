@@ -1335,7 +1335,7 @@ shinyServer(function(input, output,session){
     else if(input$language == 2){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse allemande / Europeana" = 6,"Presse suisse-allemande / Bibliothèque nationale suisse"=16 , "Livres / Ngram Viewer Allemand" = 9),selected = 6)
     }else if(input$language == 3){
-      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse flamande / KBR"=14, "Presse néerlandaise / Europeana" = 7),selected = 14)
+      updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse néerlandaise / Europeana" = 7,"Presse flamande / KBR"=14),selected = 7)
     }else if(input$language == 4){
       updateSelectInput(session,"doc_type", "Corpus",choices = list("Presse britannique / BNA" = 8, "Livres / Ngram Viewer Anglais" = 10),selected = 8)
     }else if(input$language == 5){
